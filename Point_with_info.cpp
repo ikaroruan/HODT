@@ -10,6 +10,15 @@ bool Point_with_info::operator!=(const Point_with_info& p)
 	return !(*this == p);
 }
 
+Point_with_info& Point_with_info::operator=(const Point_with_info& p)
+{
+	_x = p._x;
+	_y = p._y;
+	_info = p._info;
+
+	return *this;
+}
+
 void Point_with_info::set_info(double info)
 {
 	_info = info;

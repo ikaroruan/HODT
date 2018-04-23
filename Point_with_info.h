@@ -1,5 +1,5 @@
-#ifndef POINT_WITH_INFO
-#define POINT_WITH_INFO
+#ifndef POINT_WITH_INFO_H
+#define POINT_WITH_INFO_H
 
 #include "Point.h"
 

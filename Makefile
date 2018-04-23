@@ -189,6 +189,19 @@ Point_with_info/fast:
 .PHONY : Point_with_info/fast
 
 #=============================================================================
+# Target rules for targets named HODT
+
+# Build rule for target.
+HODT: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 HODT
+.PHONY : HODT
+
+# fast build rule for target.
+HODT/fast:
+	$(MAKE) -f CMakeFiles/HODT.dir/build.make CMakeFiles/HODT.dir/build
+.PHONY : HODT/fast
+
+#=============================================================================
 # Target rules for targets named Triangulation
 
 # Build rule for target.
@@ -307,6 +320,33 @@ Face_circulator.s: Face_circulator.cpp.s
 Face_circulator.cpp.s:
 	$(MAKE) -f CMakeFiles/Face_circulator.dir/build.make CMakeFiles/Face_circulator.dir/Face_circulator.cpp.s
 .PHONY : Face_circulator.cpp.s
+
+HODT.o: HODT.cpp.o
+
+.PHONY : HODT.o
+
+# target to build an object file
+HODT.cpp.o:
+	$(MAKE) -f CMakeFiles/HODT.dir/build.make CMakeFiles/HODT.dir/HODT.cpp.o
+.PHONY : HODT.cpp.o
+
+HODT.i: HODT.cpp.i
+
+.PHONY : HODT.i
+
+# target to preprocess a source file
+HODT.cpp.i:
+	$(MAKE) -f CMakeFiles/HODT.dir/build.make CMakeFiles/HODT.dir/HODT.cpp.i
+.PHONY : HODT.cpp.i
+
+HODT.s: HODT.cpp.s
+
+.PHONY : HODT.s
+
+# target to generate assembly for a file
+HODT.cpp.s:
+	$(MAKE) -f CMakeFiles/HODT.dir/build.make CMakeFiles/HODT.dir/HODT.cpp.s
+.PHONY : HODT.cpp.s
 
 Point.o: Point.cpp.o
 
@@ -477,13 +517,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... rebuild_cache"
 	@echo "... Vertex"
 	@echo "... Delaunay_triangulation"
 	@echo "... Face"
 	@echo "... Point"
 	@echo "... triangulate"
-	@echo "... rebuild_cache"
 	@echo "... Point_with_info"
+	@echo "... HODT"
 	@echo "... Triangulation"
 	@echo "... Face_circulator"
 	@echo "... predicates"
@@ -496,6 +537,9 @@ help:
 	@echo "... Face_circulator.o"
 	@echo "... Face_circulator.i"
 	@echo "... Face_circulator.s"
+	@echo "... HODT.o"
+	@echo "... HODT.i"
+	@echo "... HODT.s"
 	@echo "... Point.o"
 	@echo "... Point.i"
 	@echo "... Point.s"
