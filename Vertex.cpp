@@ -1,6 +1,6 @@
 #include "Vertex.h"
 
-void Vertex::point(Point& p)
+void Vertex::point(Point_with_info& p)
 {
 	_point = p;
 }
@@ -10,7 +10,7 @@ void Vertex::incident_face(Face_iterator f)
 	_incident_face = f;
 }
 
-Point& Vertex::point()
+Point_with_info& Vertex::point()
 {
 	return _point;
 }

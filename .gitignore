@@ -4,3 +4,7 @@ cmake_install.cmake
 *.swp
 CMakeFiles/
 triangulate
+toys/
+toys/*
+showme
+test_triangulate
