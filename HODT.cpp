@@ -198,6 +198,87 @@ Vertex_iterator HODT::insert_in_face(Face_iterator fc, Pinfo& p, Vertex_location
 	return v;
 }
 
+int HODT::face_order(Face_iterator fc)
+{
+	if(is_infinite(fc))
+		return 0;
+
+	typedef std::pair<Face_iterator, int> Edge;
+	int order = 0;
+
+	std::stack<Edge> stack;
+
+	// Adding edges to the stack. Each edge will check if the opposite vertex on the neighbor
+	// (mirror_index(fc, i)) lies inside the fc's circumcircle.
+	if(!is_infinite(fc->neighbor(0)))
+		stack.push(std::make_pair(fc, 0));
+	if(!is_infinite(fc->neighbor(1)))
+		stack.push(std::make_pair(fc, 1));
+	if(!is_infinite(fc->neighbor(2)))
+		stack.push(std::make_pair(fc, 2));
+
+	if(!stack.empty())
+		std::cout << "Stack is not empty.\n";
+	else
+		std::cout << "oh, hey! Stack Empty.\n";
+
+	while(!stack.empty()){
+		Edge e = stack.top();
+		stack.pop();
+
+		Face_iterator temp_face = std::get<0>(e);
+		int temp_i = std::get<1>(e);
+		Face_iterator ff = temp_face->neighbor(temp_i);
+		int i = mirror_index(temp_face, temp_i);
+
+		// If positive, order of the face increases.
+		if(incircle_test(fc->vertex(0), fc->vertex(1), fc->vertex(2), ff->vertex(i)) > 0){
+			order++;
+
+			// Adding to the stack.
+			if(!is_infinite(ff->neighbor(ccw(i))))
+				stack.push(std::make_pair(ff, ccw(i)));
+			if(!is_infinite(ff->neighbor(cw(i))))
+				stack.push(std::make_pair(ff, cw(i)));
+		}
+	}
+
+	return order;
+}
+
+int HODT::brute_order()
+{
+	int order = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			int f_order = 0;
+			for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
+				if(vi != infinite_vertex()){
+					if(incircle_test(it->vertex(0), it->vertex(1), it->vertex(2), vi) > 0)
+						f_order++;
+				}
+			}
+			if(f_order > order)
+				order = f_order;
+		}
+	}
+
+	return order;
+}
+
+int HODT::order()
+{
+	int t_order = 0;
+
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		int f_order = face_order(it);
+		if(f_order > t_order)
+			t_order = f_order;
+	}
+
+	return t_order;
+}
+
 void HODT::print_face(Face_iterator fc)
 {
 	std::cout << std::endl;

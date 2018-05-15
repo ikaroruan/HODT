@@ -22,12 +22,21 @@ int main(int argc, char** argv)
 	int aux1, aux2, aux3, size;
 	double x, y;
 	
+	Vertex_iterator v = nullptr;
 	input >> size >> aux1 >> aux2 >> aux3;
 	for(int i = 0; i < size; ++i){
 		input >> aux1 >> x >> y;
 		Pinfo p(x, y, 0);
-		t.insert(p);
+		v = t.insert(p);
 	}
+
+	//std::cout << "Checking order of a face:\n";
+	//int order = t.face_order(v->incident_face());
+	//std::cout << "order = " << order << "\n\n";
+
+	std::cout << "Checking order of the triangulation (brute force):\n";
+	int t_order = t.brute_order();
+	std::cout << "Triangulation order = " << t_order << "\n\n";
 
 	std::cout << "Printing out triangulation...\n";
 	t.output_triangulation(filename);
