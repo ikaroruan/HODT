@@ -126,3 +126,22 @@ void Face::reorient()
 	vertex(v0, 1); vertex(v1, 0);
 	neighbor(n0, 1); neighbor(n1, 0);
 }
+
+Vector3d Face::unit_normal()
+{
+	Vector3d vec0(vertex(1)->point().get_x() - vertex(0)->point().get_x(),
+		      vertex(1)->point().get_y() - vertex(0)->point().get_y(),
+		      vertex(1)->point().get_info() - vertex(0)->point().get_info());
+	Vector3d vec1(vertex(2)->point().get_x() - vertex(0)->point().get_x(),
+		      vertex(2)->point().get_y() - vertex(0)->point().get_y(),
+		      vertex(2)->point().get_info() - vertex(0)->point().get_info());
+
+	double x = vec0.get_y() * vec1.get_z() - (vec0.get_z() * vec1.get_y());
+	double y = vec0.get_z() * vec1.get_x() - (vec0.get_x() * vec1.get_z());
+	double z = vec0.get_x() * vec1.get_y() - (vec0.get_y() * vec1.get_x());
+
+	Vector3d to_return(x, y, z);
+	to_return.normalize();
+
+	return to_return;
+}

@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named triangulate
+
+# Build rule for target.
+triangulate: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 triangulate
+.PHONY : triangulate
+
+# fast build rule for target.
+triangulate/fast:
+	$(MAKE) -f CMakeFiles/triangulate.dir/build.make CMakeFiles/triangulate.dir/build
+.PHONY : triangulate/fast
+
+#=============================================================================
 # Target rules for targets named Vertex
 
 # Build rule for target.
@@ -163,17 +176,17 @@ Point/fast:
 .PHONY : Point/fast
 
 #=============================================================================
-# Target rules for targets named triangulate
+# Target rules for targets named Vector3d
 
 # Build rule for target.
-triangulate: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 triangulate
-.PHONY : triangulate
+Vector3d: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Vector3d
+.PHONY : Vector3d
 
 # fast build rule for target.
-triangulate/fast:
-	$(MAKE) -f CMakeFiles/triangulate.dir/build.make CMakeFiles/triangulate.dir/build
-.PHONY : triangulate/fast
+Vector3d/fast:
+	$(MAKE) -f CMakeFiles/Vector3d.dir/build.make CMakeFiles/Vector3d.dir/build
+.PHONY : Vector3d/fast
 
 #=============================================================================
 # Target rules for targets named Point_with_info
@@ -429,6 +442,33 @@ Triangulation.cpp.s:
 	$(MAKE) -f CMakeFiles/Triangulation.dir/build.make CMakeFiles/Triangulation.dir/Triangulation.cpp.s
 .PHONY : Triangulation.cpp.s
 
+Vector3d.o: Vector3d.cpp.o
+
+.PHONY : Vector3d.o
+
+# target to build an object file
+Vector3d.cpp.o:
+	$(MAKE) -f CMakeFiles/Vector3d.dir/build.make CMakeFiles/Vector3d.dir/Vector3d.cpp.o
+.PHONY : Vector3d.cpp.o
+
+Vector3d.i: Vector3d.cpp.i
+
+.PHONY : Vector3d.i
+
+# target to preprocess a source file
+Vector3d.cpp.i:
+	$(MAKE) -f CMakeFiles/Vector3d.dir/build.make CMakeFiles/Vector3d.dir/Vector3d.cpp.i
+.PHONY : Vector3d.cpp.i
+
+Vector3d.s: Vector3d.cpp.s
+
+.PHONY : Vector3d.s
+
+# target to generate assembly for a file
+Vector3d.cpp.s:
+	$(MAKE) -f CMakeFiles/Vector3d.dir/build.make CMakeFiles/Vector3d.dir/Vector3d.cpp.s
+.PHONY : Vector3d.cpp.s
+
 Vertex.o: Vertex.cpp.o
 
 .PHONY : Vertex.o
@@ -518,11 +558,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... triangulate"
 	@echo "... Vertex"
 	@echo "... Delaunay_triangulation"
 	@echo "... Face"
 	@echo "... Point"
-	@echo "... triangulate"
+	@echo "... Vector3d"
 	@echo "... Point_with_info"
 	@echo "... HODT"
 	@echo "... Triangulation"
@@ -549,6 +590,9 @@ help:
 	@echo "... Triangulation.o"
 	@echo "... Triangulation.i"
 	@echo "... Triangulation.s"
+	@echo "... Vector3d.o"
+	@echo "... Vector3d.i"
+	@echo "... Vector3d.s"
 	@echo "... Vertex.o"
 	@echo "... Vertex.i"
 	@echo "... Vertex.s"

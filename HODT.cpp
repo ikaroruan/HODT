@@ -279,6 +279,16 @@ int HODT::order()
 	return t_order;
 }
 
+double HODT::abn(Face_iterator fc, Face_iterator ff)
+{
+	Vector3d n1 = fc->unit_normal();
+	Vector3d n2 = ff->unit_normal();
+
+	double dot_product = n1 * n2;
+
+	return std::acos(dot_product) * (180.0/boost::math::constants::pi<double>());
+}
+
 void HODT::print_face(Face_iterator fc)
 {
 	std::cout << std::endl;

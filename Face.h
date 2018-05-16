@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Vertex.h"
+#include "Vector3d.h"
 
 class Face : public CGAL::Compact_container_base
 {
@@ -28,6 +29,7 @@ class Face : public CGAL::Compact_container_base
 	bool is_vertex(Vertex_iterator v);
 	bool is_neighbor(Face_iterator fc);
 	void reorient();
+	Vector3d unit_normal();
 
 	//void * for_compact_container() const {return _p;}
 	//void *& for_compact_container() {return _p;}
