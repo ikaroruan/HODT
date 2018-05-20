@@ -1,6 +1,6 @@
 #include "HODT.h"
 
-Vertex_iterator HODT::insert(Pinfo& p)
+Vertex_iterator HODT::insert(Point& p)
 {
 	switch(dimension())
 	{
@@ -24,7 +24,7 @@ Vertex_iterator HODT::insert(Pinfo& p)
 	return nullptr;
 }
 
-Vertex_iterator HODT::insert_dimension_2(Pinfo& p)
+Vertex_iterator HODT::insert_dimension_2(Point& p)
 {
 	Vertex_location lc;
 	int li = -1;
@@ -52,9 +52,9 @@ Vertex_iterator HODT::insert_dimension_2(Pinfo& p)
 	return nullptr;
 }
 
-Vertex_iterator HODT::insert_on_edge_2(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator HODT::insert_on_edge_2(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 
 	// Data for neighborhood.
 	Face_iterator nli = fc->neighbor(li);
@@ -94,11 +94,11 @@ Vertex_iterator HODT::insert_on_edge_2(Face_iterator fc, Pinfo& p, Vertex_locati
 	return v;
 }
 
-Vertex_iterator HODT::insert_outside_convex_hull_2(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator HODT::insert_outside_convex_hull_2(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {
 	std::list<Face_iterator> list;
 	bool done = false;
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 	Face_iterator temp = fc;
 	Vertex_iterator lastccw_vertex = nullptr;
 	Vertex_iterator lastcw_vertex = nullptr;
@@ -165,9 +165,9 @@ Vertex_iterator HODT::insert_outside_convex_hull_2(Face_iterator fc, Pinfo& p, V
 	return v;
 }
 
-Vertex_iterator HODT::insert_in_face(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator HODT::insert_in_face(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 
 	// Storing neighborhood.
 	Face_iterator n0 = fc->neighbor(0);

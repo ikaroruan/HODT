@@ -150,6 +150,19 @@ Delaunay_triangulation/fast:
 .PHONY : Delaunay_triangulation/fast
 
 #=============================================================================
+# Target rules for targets named Vertex_with_info
+
+# Build rule for target.
+Vertex_with_info: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Vertex_with_info
+.PHONY : Vertex_with_info
+
+# fast build rule for target.
+Vertex_with_info/fast:
+	$(MAKE) -f CMakeFiles/Vertex_with_info.dir/build.make CMakeFiles/Vertex_with_info.dir/build
+.PHONY : Vertex_with_info/fast
+
+#=============================================================================
 # Target rules for targets named Face
 
 # Build rule for target.
@@ -187,19 +200,6 @@ Vector3d: cmake_check_build_system
 Vector3d/fast:
 	$(MAKE) -f CMakeFiles/Vector3d.dir/build.make CMakeFiles/Vector3d.dir/build
 .PHONY : Vector3d/fast
-
-#=============================================================================
-# Target rules for targets named Point_with_info
-
-# Build rule for target.
-Point_with_info: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 Point_with_info
-.PHONY : Point_with_info
-
-# fast build rule for target.
-Point_with_info/fast:
-	$(MAKE) -f CMakeFiles/Point_with_info.dir/build.make CMakeFiles/Point_with_info.dir/build
-.PHONY : Point_with_info/fast
 
 #=============================================================================
 # Target rules for targets named HODT
@@ -388,33 +388,6 @@ Point.cpp.s:
 	$(MAKE) -f CMakeFiles/Point.dir/build.make CMakeFiles/Point.dir/Point.cpp.s
 .PHONY : Point.cpp.s
 
-Point_with_info.o: Point_with_info.cpp.o
-
-.PHONY : Point_with_info.o
-
-# target to build an object file
-Point_with_info.cpp.o:
-	$(MAKE) -f CMakeFiles/Point_with_info.dir/build.make CMakeFiles/Point_with_info.dir/Point_with_info.cpp.o
-.PHONY : Point_with_info.cpp.o
-
-Point_with_info.i: Point_with_info.cpp.i
-
-.PHONY : Point_with_info.i
-
-# target to preprocess a source file
-Point_with_info.cpp.i:
-	$(MAKE) -f CMakeFiles/Point_with_info.dir/build.make CMakeFiles/Point_with_info.dir/Point_with_info.cpp.i
-.PHONY : Point_with_info.cpp.i
-
-Point_with_info.s: Point_with_info.cpp.s
-
-.PHONY : Point_with_info.s
-
-# target to generate assembly for a file
-Point_with_info.cpp.s:
-	$(MAKE) -f CMakeFiles/Point_with_info.dir/build.make CMakeFiles/Point_with_info.dir/Point_with_info.cpp.s
-.PHONY : Point_with_info.cpp.s
-
 Triangulation.o: Triangulation.cpp.o
 
 .PHONY : Triangulation.o
@@ -496,6 +469,33 @@ Vertex.cpp.s:
 	$(MAKE) -f CMakeFiles/Vertex.dir/build.make CMakeFiles/Vertex.dir/Vertex.cpp.s
 .PHONY : Vertex.cpp.s
 
+Vertex_with_info.o: Vertex_with_info.cpp.o
+
+.PHONY : Vertex_with_info.o
+
+# target to build an object file
+Vertex_with_info.cpp.o:
+	$(MAKE) -f CMakeFiles/Vertex_with_info.dir/build.make CMakeFiles/Vertex_with_info.dir/Vertex_with_info.cpp.o
+.PHONY : Vertex_with_info.cpp.o
+
+Vertex_with_info.i: Vertex_with_info.cpp.i
+
+.PHONY : Vertex_with_info.i
+
+# target to preprocess a source file
+Vertex_with_info.cpp.i:
+	$(MAKE) -f CMakeFiles/Vertex_with_info.dir/build.make CMakeFiles/Vertex_with_info.dir/Vertex_with_info.cpp.i
+.PHONY : Vertex_with_info.cpp.i
+
+Vertex_with_info.s: Vertex_with_info.cpp.s
+
+.PHONY : Vertex_with_info.s
+
+# target to generate assembly for a file
+Vertex_with_info.cpp.s:
+	$(MAKE) -f CMakeFiles/Vertex_with_info.dir/build.make CMakeFiles/Vertex_with_info.dir/Vertex_with_info.cpp.s
+.PHONY : Vertex_with_info.cpp.s
+
 predicates.o: predicates.c.o
 
 .PHONY : predicates.o
@@ -561,10 +561,10 @@ help:
 	@echo "... triangulate"
 	@echo "... Vertex"
 	@echo "... Delaunay_triangulation"
+	@echo "... Vertex_with_info"
 	@echo "... Face"
 	@echo "... Point"
 	@echo "... Vector3d"
-	@echo "... Point_with_info"
 	@echo "... HODT"
 	@echo "... Triangulation"
 	@echo "... Face_circulator"
@@ -584,9 +584,6 @@ help:
 	@echo "... Point.o"
 	@echo "... Point.i"
 	@echo "... Point.s"
-	@echo "... Point_with_info.o"
-	@echo "... Point_with_info.i"
-	@echo "... Point_with_info.s"
 	@echo "... Triangulation.o"
 	@echo "... Triangulation.i"
 	@echo "... Triangulation.s"
@@ -596,6 +593,9 @@ help:
 	@echo "... Vertex.o"
 	@echo "... Vertex.i"
 	@echo "... Vertex.s"
+	@echo "... Vertex_with_info.o"
+	@echo "... Vertex_with_info.i"
+	@echo "... Vertex_with_info.s"
 	@echo "... predicates.o"
 	@echo "... predicates.i"
 	@echo "... predicates.s"

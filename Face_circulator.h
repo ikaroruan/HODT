@@ -2,7 +2,7 @@
 #define FACE_CIRCULATOR_H
 
 #include <iostream>
-#include "Vertex.h"
+#include "Vertex_with_info.h"
 #include "Face.h"
 
 class Face_circulator

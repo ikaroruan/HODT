@@ -4,11 +4,9 @@
 #include <chrono>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#
-#include "HODT.h"
-#include "Point_with_info.h"
 
-typedef Point_with_info Pinfo;
+#include "HODT.h"
+
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Triangle_3<K> Triangle;
 typedef K::Point_3 P3d;
@@ -28,9 +26,10 @@ int main(int argc, char** argv)
 	std::cout << "Constructing Triangulation.\n";
 	for(int i = 0; i < psize; ++i){
 		input >> x >> y >> info;
-		Pinfo p(x, y, info);
-		t.insert(p);
-		Pinfo pp(x, y, 0);
+		Point p(x, y);
+		Vertex_iterator v = t.insert(p);
+		v->info(info);
+		Point pp(x, y);
 		dt.insert(pp);
 	}
 	std::cout << "Done.\n";
@@ -48,19 +47,18 @@ int main(int argc, char** argv)
 				continue;
 			double abn = t.abn(fc, ff);
 			
-			Triangle t1(P3d(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->point().get_info()), 
-				    P3d(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->point().get_info()),
-				    P3d(fc->vertex(2)->point().get_x(), fc->vertex(2)->point().get_y(), fc->vertex(2)->point().get_info()));
-			Triangle t2(P3d(ff->vertex(0)->point().get_x(), ff->vertex(0)->point().get_y(), ff->vertex(0)->point().get_info()), 
-				    P3d(ff->vertex(1)->point().get_x(), ff->vertex(1)->point().get_y(), ff->vertex(1)->point().get_info()),
-				    P3d(ff->vertex(2)->point().get_x(), ff->vertex(2)->point().get_y(), ff->vertex(2)->point().get_info()));
+			Triangle t1(P3d(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info()), 
+				    P3d(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info()),
+				    P3d(fc->vertex(2)->point().get_x(), fc->vertex(2)->point().get_y(), fc->vertex(2)->info()));
+			Triangle t2(P3d(ff->vertex(0)->point().get_x(), ff->vertex(0)->point().get_y(), ff->vertex(0)->info()), 
+				    P3d(ff->vertex(1)->point().get_x(), ff->vertex(1)->point().get_y(), ff->vertex(1)->info()),
+				    P3d(ff->vertex(2)->point().get_x(), ff->vertex(2)->point().get_y(), ff->vertex(2)->info()));
 			double result = ABN(t1, t2);
 			if(abn != result){
 				std::cout << "WRONG ABN!\n";
 				std::cout << "abn = " << abn << "\n";
 				std::cout << "CGAL: abn = " << result << "\n\n";
 			}
-
 		}
 	}
 	std::cout << "Done!\n";

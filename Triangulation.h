@@ -10,7 +10,7 @@
 #include <utility>
 #include <iostream>
 
-#include "Vertex.h"
+#include "Vertex_with_info.h"
 #include "Face.h"
 #include "Face_circulator.h"
 
@@ -20,6 +20,8 @@
 #include <CGAL/spatial_sort.h>
 #include <CGAL/Compact_container.h>
 
+typedef Vertex_with_info Vinfo;
+
 extern "C"{
 	// get exact predicates from a C code
 	#include "predicates.h"
@@ -27,19 +29,19 @@ extern "C"{
 
 // Geometric traits for CGAL spatial sort
 struct Less_x{
-	bool operator()(const Point_with_info& p, const Point_with_info& q) const{
+	bool operator()(const Point& p, const Point& q) const{
 		return (p.get_x() < q.get_x());
 	}
 };
 
 struct Less_y{
-	bool operator()(const Point_with_info& p, const Point_with_info& q) const{
+	bool operator()(const Point& p, const Point& q) const{
 		return (p.get_y() < q.get_y());
 	}
 };
 
 struct Spatial_sort_traits{
-	typedef Point_with_info Point_2;
+	typedef Point Point_2;
 	typedef Less_x Less_x_2;
 	typedef Less_y Less_y_2;
 
@@ -94,17 +96,17 @@ class Triangulation
 	int mirror_index(Face_iterator fc, int i);
 	bool dim_goes_down(Vertex_iterator v);
 	bool is_infinite(Face_iterator fc);
-	bool collinear_between(Point_with_info& p, Point_with_info& q, Point_with_info& r);
+	bool collinear_between(Point& p, Point& q, Point& r);
 	bool vertices_are_collinear(Vertex_iterator va, Vertex_iterator vb, Vertex_iterator vc);
-	bool is_equal(Point_with_info& p, Point_with_info& q);
+	bool is_equal(Point& p, Point& q);
 	Vertex_iterator random_vertex();
-	Vertex_iterator is_vertex(Face_iterator fc, Point_with_info p);
+	Vertex_iterator is_vertex(Face_iterator fc, Point p);
 
 	// GEOMETRIC PREDICATES AND POINT LOCATION
-	double orientation_test(Point_with_info& a, Point_with_info& b, Point_with_info& c);
+	double orientation_test(Point& a, Point& b, Point& c);
 	double orientation_test(Vertex_iterator va, Vertex_iterator vb, Vertex_iterator vc);
-	Face_iterator locate(Point_with_info& p, Face_iterator fc, Vertex_location& location, int& li);
-	Face_iterator locate(Point_with_info& p, Vertex_location& location, int& li);
+	Face_iterator locate(Point& p, Face_iterator fc, Vertex_location& location, int& li);
+	Face_iterator locate(Point& p, Vertex_location& location, int& li);
 
 	// TRIANGULATION INPUT AND OUTPUTS
 	Face_iterator create_triangulation(std::istream& in);
@@ -119,7 +121,7 @@ class Triangulation
 	Vertices_container _vertices;
 	Faces_container _faces;
 	int _dimension;
-	Vertex _infinite_vertex;
+	Vinfo _infinite_vertex;
 	Vertex_iterator _infinite_vertex_iterator;
 	Face_iterator _key_face;
 	

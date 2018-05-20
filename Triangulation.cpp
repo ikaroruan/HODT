@@ -101,7 +101,7 @@ bool Triangulation::is_infinite(Face_iterator fc)
 	return false;
 }
 
-bool Triangulation::is_equal(Point_with_info& p, Point_with_info& q)
+bool Triangulation::is_equal(Point& p, Point& q)
 {
 	return ((p.get_x() == q.get_x()) && (p.get_y() == q.get_y()));
 }
@@ -129,7 +129,7 @@ int Triangulation::mirror_index(Face_iterator fc, int i)
 }
 
 // Tests whether q is collinear between p and r
-bool Triangulation::collinear_between(Point_with_info& p, Point_with_info& q, Point_with_info& r)
+bool Triangulation::collinear_between(Point& p, Point& q, Point& r)
 {
 	// Precodition that p and r are supposed to be collinear
 	double px = p.get_x(); double py = p.get_y();
@@ -214,11 +214,11 @@ void Triangulation::flip(Face_iterator fc, int i)
 		v_ccw->incident_face(fc);
 }
 
-Vertex_iterator Triangulation::is_vertex(Face_iterator fc, Point_with_info p)
+Vertex_iterator Triangulation::is_vertex(Face_iterator fc, Point p)
 {
 	for(int i = 0; i < 3; ++i){
 		double vx, vy, px, py;
-		Point_with_info vp = fc->vertex(i)->point();
+		Point vp = fc->vertex(i)->point();
 		vx = vp.get_x(); vy = vp.get_y();
 		px = p.get_x(); py = p.get_y();
 
@@ -242,7 +242,7 @@ double Triangulation::orientation_test(Vertex_iterator va, Vertex_iterator vb, V
 	return orientation_test(va->point(), vb->point(), vc->point());
 }
 
-double Triangulation::orientation_test(Point_with_info& a, Point_with_info& b, Point_with_info& c)
+double Triangulation::orientation_test(Point& a, Point& b, Point& c)
 {
 	double pa[2]; double pb[2]; double pc[2];
 
@@ -262,12 +262,12 @@ bool Triangulation::vertices_are_collinear(Vertex_iterator va, Vertex_iterator v
 }
 
 // In this case, key_face is the last finite face returned by locate function. Otherwise, it should be nullptr.
-Face_iterator Triangulation::locate(Point_with_info& p, Vertex_location& location, int& li)
+Face_iterator Triangulation::locate(Point& p, Vertex_location& location, int& li)
 {	
 	return locate(p, key_face(), location, li);
 }
 
-Face_iterator Triangulation::locate(Point_with_info& p, Face_iterator fc, Vertex_location& location, int& li)
+Face_iterator Triangulation::locate(Point& p, Face_iterator fc, Vertex_location& location, int& li)
 {
 	li = -1; // used for indicating edge location for dimension => 2
 	if(dimension() < 0){ // only the infinite vertex exists
@@ -285,8 +285,8 @@ Face_iterator Triangulation::locate(Point_with_info& p, Face_iterator fc, Vertex
 	if(dimension() == 1){ // there are at least two vertices and the infinite vertex
 		Face_iterator fn = faces().begin();
 		int vi = fn->index(infinite_vertex());
-		Point_with_info& p0 = fn->vertex(ccw(vi))->point(); 	
-		Point_with_info& p1 = fn->vertex(cw(vi))->point();
+		Point& p0 = fn->vertex(ccw(vi))->point(); 	
+		Point& p1 = fn->vertex(cw(vi))->point();
 		Face_iterator fmin = nullptr; Vertex_iterator vmin = nullptr; double dmin = -1;
 		Face_iterator fmax = nullptr; Vertex_iterator vmax = nullptr; double dmax = -1;
 		
@@ -401,9 +401,9 @@ Face_iterator Triangulation::locate(Point_with_info& p, Face_iterator fc, Vertex
 	}
 
 	while(true){
-		Point_with_info& pa = fc->vertex(0)->point();
-		Point_with_info& pb = fc->vertex(1)->point();
-		Point_with_info& pc = fc->vertex(2)->point();
+		Point& pa = fc->vertex(0)->point();
+		Point& pb = fc->vertex(1)->point();
+		Point& pc = fc->vertex(2)->point();
 
 		double o1 = orientation_test(pa, pb, p);
 		double o2 = orientation_test(pb, pc, p);
@@ -590,7 +590,7 @@ Face_iterator Triangulation::create_triangulation(std::istream& in)
 	for(int i = 1; i < n; ++i){
 		in >> x >> y;
 		// FIXME: Constructing a DT without info.
-		Vertex vi(Point_with_info(x,y, 0));
+		Vertex_with_info vi(Point(x,y));
 		Vertex_iterator vit = vertices().insert(vi);
 		vertices_vector[i] = vit;
 	}

@@ -16,9 +16,9 @@
 //                                              INSERTION                                                //
 //					  ===================== 					 //
 
-void Delaunay_triangulation::insert(std::vector<Pinfo>::iterator start, std::vector<Pinfo>::iterator end)
+void Delaunay_triangulation::insert(std::vector<Point>::iterator start, std::vector<Point>::iterator end)
 {
-	typedef std::vector<Pinfo>::iterator	Point_iterator;
+	typedef std::vector<Point>::iterator	Point_iterator;
 
 	Spatial_sort_traits sst;
 	CGAL::spatial_sort(start, end, sst);
@@ -36,7 +36,7 @@ void Delaunay_triangulation::insert(std::vector<Pinfo>::iterator start, std::vec
 #endif
 }
 
-Vertex_iterator Delaunay_triangulation::insert(Pinfo& p)
+Vertex_iterator Delaunay_triangulation::insert(Point& p)
 {
 	switch(dimension()){
 		case -1:{
@@ -62,9 +62,9 @@ Vertex_iterator Delaunay_triangulation::insert(Pinfo& p)
 	return nullptr;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_first(Pinfo& p)
+Vertex_iterator Delaunay_triangulation::insert_first(Point& p)
 {
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 	Face fc(v, infinite_vertex(), infinite_vertex());
 	Face_iterator fcit = faces().insert(fc);
 	v->incident_face(fcit);
@@ -78,9 +78,9 @@ Vertex_iterator Delaunay_triangulation::insert_first(Pinfo& p)
 	return v;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_second(Pinfo& p)
+Vertex_iterator Delaunay_triangulation::insert_second(Point& p)
 {
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 	Face_iterator fc = faces().begin();
 	dimension(dimension() + 1);
 	
@@ -98,7 +98,7 @@ Vertex_iterator Delaunay_triangulation::insert_second(Pinfo& p)
 	return v;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_dimension_1(Pinfo& p)
+Vertex_iterator Delaunay_triangulation::insert_dimension_1(Point& p)
 {
 	Vertex_location lt;
 	int li = -1;
@@ -123,9 +123,9 @@ Vertex_iterator Delaunay_triangulation::insert_dimension_1(Pinfo& p)
 	return nullptr;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_on_edge_1(Face_iterator fc, Pinfo& p, Vertex_location lt, int li)
+Vertex_iterator Delaunay_triangulation::insert_on_edge_1(Face_iterator fc, Point& p, Vertex_location lt, int li)
 {
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 	Face_iterator ff = nullptr;
 	// li == -1 means that p is collinear between two points of fc
 	if(li == -1){
@@ -181,12 +181,12 @@ Vertex_iterator Delaunay_triangulation::insert_on_edge_1(Face_iterator fc, Pinfo
 	return v;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_1(Pinfo& p, Face_iterator fc, int li)
+Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_1(Point& p, Face_iterator fc, int li)
 {
 	Vertex_iterator vmax = fc->vertex(li);
 	std::list<Face_iterator> infinite_created;
 	std::list<Face_iterator> to_copy;
-	Vertex_iterator v = vertices().insert(Vertex(p));
+	Vertex_iterator v = vertices().insert(Vertex_with_info(p));
 
 	// FIXME: Adding new faces to the compact container while iterating along its elements
 	// arises in infinite loop.
@@ -212,8 +212,8 @@ Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_1(Pinfo& p, F
 	v->incident_face(ff);
 
 	// Checking if reorientation of vertices is needed
-	Pinfo pa = ff->vertex( ccw(ff->index(v)) )->point();
-	Pinfo pb = ff->vertex( cw(ff->index(v)) )->point();
+	Point pa = ff->vertex( ccw(ff->index(v)) )->point();
+	Point pb = ff->vertex( cw(ff->index(v)) )->point();
 
 	if(orientation_test(pa, pb, p) < 0){
 		for(std::list<Face_iterator>::iterator it = infinite_created.begin(); it != infinite_created.end(); ++it)
@@ -280,7 +280,7 @@ Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_1(Pinfo& p, F
 	return v;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_dimension_2(Pinfo& p)
+Vertex_iterator Delaunay_triangulation::insert_dimension_2(Point& p)
 {
 	Vertex_location lc;
 	int li = -1; // used for locating the triangle edge, when point lies on edge
@@ -314,11 +314,11 @@ Vertex_iterator Delaunay_triangulation::insert_dimension_2(Pinfo& p)
 	return nullptr;
 }
 
-Vertex_iterator Delaunay_triangulation::insert_in_hole(Face_iterator fc, Pinfo& p, int li, Vertex_location lc)
+Vertex_iterator Delaunay_triangulation::insert_in_hole(Face_iterator fc, Point& p, int li, Vertex_location lc)
 {
 	std::vector<Face_iterator> region;
 	std::vector<std::pair<Face_iterator, int>> cavity;
-	Vertex_iterator new_vertex = vertices().insert(Vertex(p));
+	Vertex_iterator new_vertex = vertices().insert(Vertex_with_info(p));
 	std::vector<Face_iterator> faces_created;
 
 #ifndef NDEBUG
@@ -398,17 +398,17 @@ Vertex_iterator Delaunay_triangulation::insert_in_hole(Face_iterator fc, Pinfo& 
 
 }
 
-Vertex_iterator Delaunay_triangulation::insert_in_face(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator Delaunay_triangulation::insert_in_face(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {
 	return insert_in_hole(fc, p, -1, lc);
 }
 
-Vertex_iterator Delaunay_triangulation::insert_on_edge_2(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator Delaunay_triangulation::insert_on_edge_2(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {	
 	return insert_in_hole(fc, p, li, lc);
 }
 
-Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_2(Face_iterator fc, Pinfo& p, Vertex_location lc, int li)
+Vertex_iterator Delaunay_triangulation::insert_outside_convex_hull_2(Face_iterator fc, Point& p, Vertex_location lc, int li)
 {
 	return insert_in_hole(fc, p, -1, lc);
 }
@@ -695,7 +695,7 @@ double Delaunay_triangulation::incircle_test(Vertex_iterator va, Vertex_iterator
 	return incircle_test(va->point(), vb->point(), vc->point(), vd->point());
 }
 
-double Delaunay_triangulation::incircle_test(Pinfo& a, Pinfo& b, Pinfo& c, Pinfo& d)
+double Delaunay_triangulation::incircle_test(Point& a, Point& b, Point& c, Point& d)
 {
 	double pa[2]; double pb[2]; double pc[2]; double pd[2];
 
@@ -712,14 +712,14 @@ double Delaunay_triangulation::incircle_test(Pinfo& a, Pinfo& b, Pinfo& c, Pinfo
 //                                              UTILITIES                                                //
 //					  =====================						 //
 
-void Delaunay_triangulation::conflict_region(Face_iterator fc, Pinfo& pp, std::vector<Face_iterator>& region, std::vector<std::pair<Face_iterator, int>>& cavity, Vertex_location lc, int li)
+void Delaunay_triangulation::conflict_region(Face_iterator fc, Point& pp, std::vector<Face_iterator>& region, std::vector<std::pair<Face_iterator, int>>& cavity, Vertex_location lc, int li)
 {
 	std::stack<Face_iterator> stack;
 	Face_iterator ff = nullptr;
 	Face_iterator fn = nullptr;
 	Face_iterator key = nullptr;
 	Vertex_iterator v0; Vertex_iterator v1; Vertex_iterator v2;
-	Pinfo p0; Pinfo p1; Pinfo p2; 
+	Point p0; Point p1; Point p2; 
 	// if a point lies on the convex hull boundary and infinite face need to be added to cavity
 	bool boundary_edge = false;
 

@@ -2,7 +2,7 @@
 #define FACE_H
 
 #include <iostream>
-#include "Vertex.h"
+#include "Vertex_with_info.h"
 #include "Vector3d.h"
 
 class Face : public CGAL::Compact_container_base
