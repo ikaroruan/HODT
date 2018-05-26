@@ -202,65 +202,26 @@ int HODT::face_order(Face_iterator fc)
 {
 	if(is_infinite(fc))
 		return 0;
-
-	typedef std::pair<Face_iterator, int> Edge;
-	int order = 0;
-
-	std::stack<Edge> stack;
-
-	// Adding edges to the stack. Each edge will check if the opposite vertex on the neighbor
-	// (mirror_index(fc, i)) lies inside the fc's circumcircle.
-	if(!is_infinite(fc->neighbor(0)))
-		stack.push(std::make_pair(fc, 0));
-	if(!is_infinite(fc->neighbor(1)))
-		stack.push(std::make_pair(fc, 1));
-	if(!is_infinite(fc->neighbor(2)))
-		stack.push(std::make_pair(fc, 2));
-
-	if(!stack.empty())
-		std::cout << "Stack is not empty.\n";
-	else
-		std::cout << "oh, hey! Stack Empty.\n";
-
-	while(!stack.empty()){
-		Edge e = stack.top();
-		stack.pop();
-
-		Face_iterator temp_face = std::get<0>(e);
-		int temp_i = std::get<1>(e);
-		Face_iterator ff = temp_face->neighbor(temp_i);
-		int i = mirror_index(temp_face, temp_i);
-
-		// If positive, order of the face increases.
-		if(incircle_test(fc->vertex(0), fc->vertex(1), fc->vertex(2), ff->vertex(i)) > 0){
-			order++;
-
-			// Adding to the stack.
-			if(!is_infinite(ff->neighbor(ccw(i))))
-				stack.push(std::make_pair(ff, ccw(i)));
-			if(!is_infinite(ff->neighbor(cw(i))))
-				stack.push(std::make_pair(ff, cw(i)));
+	
+	int f_order = 0;
+	
+	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
+		if(vi != infinite_vertex()){
+			if(incircle_test(fc->vertex(0), fc->vertex(1), fc->vertex(2), vi) > 0)
+				f_order++;
 		}
 	}
 
-	return order;
+	return f_order;
 }
 
 int HODT::brute_order()
 {
 	int order = 0;
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
-		if(!is_infinite(it)){
-			int f_order = 0;
-			for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
-				if(vi != infinite_vertex()){
-					if(incircle_test(it->vertex(0), it->vertex(1), it->vertex(2), vi) > 0)
-						f_order++;
-				}
-			}
-			if(f_order > order)
-				order = f_order;
-		}
+		int f_order = face_order(it);
+		if(f_order > order)
+			order = f_order;
 	}
 
 	return order;
@@ -279,6 +240,12 @@ int HODT::order()
 	return t_order;
 }
 
+// Angle between normals criteria.
+double HODT::abn(Face_iterator fc, int i)
+{
+	return abn(fc, fc->neighbor(i));
+}
+
 double HODT::abn(Face_iterator fc, Face_iterator ff)
 {
 	Vector3d n1 = fc->unit_normal();
@@ -287,6 +254,30 @@ double HODT::abn(Face_iterator fc, Face_iterator ff)
 	double dot_product = n1 * n2;
 
 	return std::acos(dot_product) * (180.0/boost::math::constants::pi<double>());
+}
+
+// Edge is implicit in the data structure as edge between two neighbor faces.
+double HODT::edge_length(Face_iterator fc, int i)
+{
+	return edge_length(fc->vertex(ccw(i)), fc->vertex(cw(i)));
+}
+
+double HODT::edge_length(Vertex_iterator v, Vertex_iterator u)
+{
+	return std::sqrt(std::pow(v->point().get_x() - u->point().get_x(), 2) +
+			 std::pow(v->point().get_y() - u->point().get_y(), 2) +
+			 std::pow(v->info() - u->info(), 2));
+}
+
+// Weighted angle between normals, where the edge length is the weight.
+double HODT::wabn(Face_iterator fc, int i)
+{
+	return wabn(fc, fc->neighbor(i));
+}
+
+double HODT::wabn(Face_iterator fc, Face_iterator ff)
+{
+	return edge_length(fc, fc->index(ff)) * abn(fc, ff);
 }
 
 void HODT::print_face(Face_iterator fc)

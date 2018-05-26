@@ -12,7 +12,7 @@ typedef CGAL::Triangle_3<K> Triangle;
 typedef K::Point_3 P3d;
 typedef K::Vector_3 V3d;
 
-double WABN(Triangle t1, Triangle t2, int i);
+double ABN(Triangle t1, Triangle t2);
 
 int main(int argc, char** argv)
 {
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 			Face_iterator ff = fc->neighbor(i);
 			if(t.is_infinite(fc) || t.is_infinite(ff))
 				continue;
-			double wabn = t.wabn(fc, ff);
+			double abn = t.abn(fc, ff);
 			
 			Triangle t1(P3d(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info()), 
 				    P3d(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info()),
@@ -53,11 +53,11 @@ int main(int argc, char** argv)
 			Triangle t2(P3d(ff->vertex(0)->point().get_x(), ff->vertex(0)->point().get_y(), ff->vertex(0)->info()), 
 				    P3d(ff->vertex(1)->point().get_x(), ff->vertex(1)->point().get_y(), ff->vertex(1)->info()),
 				    P3d(ff->vertex(2)->point().get_x(), ff->vertex(2)->point().get_y(), ff->vertex(2)->info()));
-			double result = WABN(t1, t2, fc->index(ff));
-			if(wabn != result){
+			double result = ABN(t1, t2);
+			if(abn != result){
 				std::cout << "WRONG ABN!\n";
-				std::cout << "wabn = " << wabn << "\n";
-				std::cout << "CGAL: wabn = " << result << "\n\n";
+				std::cout << "abn = " << abn << "\n";
+				std::cout << "CGAL: abn = " << result << "\n\n";
 			}
 		}
 	}
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-double WABN(Triangle t1, Triangle t2, int i)
+double ABN(Triangle t1, Triangle t2)
 {
 	V3d n1 = CGAL::unit_normal(t1.vertex(0), t1.vertex(1), t1.vertex(2));
 	V3d n2 = CGAL::unit_normal(t2.vertex(0), t2.vertex(1), t2.vertex(2));
@@ -94,11 +94,9 @@ double WABN(Triangle t1, Triangle t2, int i)
 	//std::cout << "n1: x = " << n1.x() << " y = " << n1.y() << " z = " << n1.z() << "\n";
 	//std::cout << "n2: x = " << n2.x() << " y = " << n2.y() << " z = " << n2.z() << "\n";
 	
-	HODT t;
 	double c = n1.x()*n2.x() + n1.y()*n2.y() + n1.z()*n2.z();
 	//std::cout << "Dot Product = " << c << "\n";
 	double a = std::acos(c) * (180 / boost::math::constants::pi<double>());
-	a = std::sqrt(CGAL::squared_distance(t1.vertex(t.ccw(i)), t1.vertex(t.cw(i)))) * a;
 	return a;
 
 }

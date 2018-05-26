@@ -19,7 +19,12 @@ class HODT : public Delaunay_triangulation
 	Vertex_iterator insert_on_edge_2(Face_iterator fc, Point& p, Vertex_location lc, int li);
 	Vertex_iterator insert_outside_convex_hull_2(Face_iterator fc, Point& p, Vertex_location lc, int li);
 
+	double abn(Face_iterator fc, int i);
 	double abn(Face_iterator fc, Face_iterator ff);
+	double wabn(Face_iterator fc, int i);
+	double wabn(Face_iterator fc, Face_iterator ff);
+	double edge_length(Face_iterator fc, int i);
+	double edge_length(Vertex_iterator v, Vertex_iterator u);
 
 	int face_order(Face_iterator fc);
 	int brute_order();
