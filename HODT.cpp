@@ -1,5 +1,16 @@
 #include "HODT.h"
 
+void HODT::max_order(int m_order)
+{
+	_max_order = m_order;
+}
+
+int HODT::max_order()
+{
+	return _max_order;
+}
+
+/*
 Vertex_iterator HODT::insert(Point& p)
 {
 	switch(dimension())
@@ -196,7 +207,7 @@ Vertex_iterator HODT::insert_in_face(Face_iterator fc, Point& p, Vertex_location
 	key_face(nf1);
 
 	return v;
-}
+}*/
 
 int HODT::face_order(Face_iterator fc)
 {
@@ -278,6 +289,177 @@ double HODT::wabn(Face_iterator fc, int i)
 double HODT::wabn(Face_iterator fc, Face_iterator ff)
 {
 	return edge_length(fc, fc->index(ff)) * abn(fc, ff);
+}
+
+// Checking wheter or not two faces forms a convex polygon.
+bool HODT::convex_polygon(Face_iterator fc, int i)
+{
+	return convex_polygon(fc, fc->neighbor(i));
+}
+
+bool HODT::convex_polygon(Face_iterator fc, Face_iterator ff)
+{
+	int i = fc->index(ff);
+	Vertex_iterator u = fc->vertex(i);
+	int j = ff->index(fc);
+	Vertex_iterator v = ff->vertex(j);
+	
+	double key1 = orientation_test(u, v, fc->vertex(ccw(i)));
+	double key2 = orientation_test(u, v, fc->vertex(cw(i)));
+
+	// FIXME: If three points are collinear the faces still forms a convex polygon, 
+	// but this situation may not be useful for flipping faces.
+	return !((key1 > 0 && key2 > 0) || (key1 < 0 && key2 < 0));
+}
+
+double HODT::criteria_result(Face_iterator fc, int i, Optimization_criteria& c)
+{
+	return criteria_result(fc, fc->neighbor(i), c);
+}
+
+double HODT::criteria_result(Face_iterator fc, Face_iterator ff, Optimization_criteria& c)
+{
+	switch(c)
+	{
+		case ABN:
+			return abn(fc, ff);
+			break;
+		case WABN:
+			return wabn(fc, ff);
+			break;
+		default:
+			std::cerr << "ERROR: Wrong optimization criteria. (criteria_result function)\n";
+			break;
+	}
+	
+	// Error sign.
+	return -1;
+}
+
+double HODT::global_min_criteria(Optimization_criteria& c)
+{
+	double min_face = 0;
+	int count = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			for(int i = 0; i < 3; ++i){
+				if(!is_infinite(it->neighbor(i))){
+					double abn_result = criteria_result(it, it->neighbor(i), c);
+					if(count == 0) min_face = abn_result;
+					count++;
+					if(abn_result < min_face)
+						min_face = abn_result;
+				}
+			}
+		}
+	}
+
+	return min_face;
+}
+
+double HODT::global_max_criteria(Optimization_criteria& c)
+{
+	double max_face = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			for(int i = 0; i < 3; ++i){
+				if(!is_infinite(it->neighbor(i))){
+					double abn_result = criteria_result(it, it->neighbor(i), c);
+					if(abn_result > max_face)
+						max_face = abn_result;
+				}
+			}
+		}
+	}
+
+	return max_face;
+}
+
+double HODT::global_average_criteria(Optimization_criteria& c)
+{
+	double sum = 0;
+	double count = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			for(int i = 0; i < 3; ++i){
+				if(!is_infinite(it->neighbor(i))){
+					double abn_result = criteria_result(it, it->neighbor(i), c);
+					sum += abn_result;
+					count++;
+				}
+			}
+		}
+	}
+
+	return (sum/count);
+}
+
+double HODT::optimize(Optimization_criteria& c)
+{
+	int flips_count = 0;
+	double max = 0;
+	std::queue<std::pair<Face_iterator, int>> queue;
+
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			for(int i = 0; i < 3; ++i){
+				if(!is_infinite(it->neighbor(i))){
+					queue.push(std::make_pair(it, i));
+				}
+			}
+		}
+	}
+
+	while(!queue.empty()){
+		std::pair<Face_iterator, int> pair = queue.front();
+		Face_iterator fc = std::get<0>(pair);
+		int i = std::get<1>(pair);
+		queue.pop();
+
+		double max_face = 0;
+		if(!is_infinite(fc->neighbor(i))){
+			if(convex_polygon(fc, fc->neighbor(i))){
+				double initial_value = std::max(criteria_result(fc, i, c), 
+								std::max(criteria_result(fc, ccw(i), c), 
+								std::max(criteria_result(fc, cw(i), c), 
+								std::max(criteria_result(fc->neighbor(i), ccw(mirror_index(fc, i)), c), 
+									 criteria_result(fc->neighbor(i), cw(mirror_index(fc, i)), c)))));
+				Face_iterator fn = fc->neighbor(i);
+				flip(fc, i);
+				double after_value = std::max(criteria_result(fc, fc->index(fn), c), 
+							      std::max(criteria_result(fc, ccw(fc->index(fn)), c), 
+							      std::max(criteria_result(fc, cw(fc->index(fn)), c), 
+							      std::max(criteria_result(fn, ccw(fn->index(fc)), c), 
+							      	       criteria_result(fn, cw(fn->index(fc)), c)))));
+				int fc_order = face_order(fc);
+				int fn_order = face_order(fn);
+				if(fc_order > max_order() || fn_order > max_order() || after_value > initial_value){
+					flip(fc, fc->index(fn));
+					if(initial_value > max_face) max_face = initial_value;
+				}
+				else{ // Then, edge was optmized.
+					if(after_value < max_face)
+						max_face = after_value;
+					int j = fc->index(fn);
+					queue.push(std::make_pair(fc, ccw(fc->index(fn))));
+					queue.push(std::make_pair(fc, cw(fc->index(fn))));
+					queue.push(std::make_pair(fn, ccw(j)));
+					queue.push(std::make_pair(fc, cw(j)));
+					flips_count++;
+				}
+			}
+		}
+		if(max_face > max)
+			max = max_face;
+	}
+	std::cout << "Number of flips = " << flips_count << "\n";
+	double min = global_min_criteria(c);
+	double max_result = global_max_criteria(c);
+	double average_result = global_average_criteria(c);
+	std::cout << "Min ABN = " << min << "\n";
+	std::cout << "Max ABN = " << max_result << "\n";
+	std::cout << "Average ABN = " << average_result << "\n";
+	return max;
 }
 
 void HODT::print_face(Face_iterator fc)
