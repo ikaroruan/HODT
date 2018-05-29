@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-	HODT t(1);
+	HODT t(0);
 	std::ifstream input("toys/KinzelSprings-VIP-3pct-rnd.cin");
 	int psize, aux1, aux2, aux3;
 	double x, y, info;
