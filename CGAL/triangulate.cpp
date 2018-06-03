@@ -57,6 +57,7 @@ int main(int argc, char** argv)
 	}
 
 	std::ifstream input(argv[1]);
+	std::ofstream output("out_cgal.tri");
 	int size, aux1, aux2, aux3;
 	double x, y, z;
 	std::vector<Point3> vector;
@@ -76,6 +77,8 @@ int main(int argc, char** argv)
 	std::cout << "Min ABN = " << min_abn(dt) << "\n";
 	std::cout << "Max Aspect Ratio = " << max_aspect_ratio(dt) << "\n";
 	std::cout << "Avg Aspect Ratio = " << average_aspect_ratio(dt) << "\n";
+
+	output << dt;
 
 	return 0;
 }

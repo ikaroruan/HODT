@@ -587,8 +587,9 @@ Face_iterator Triangulation::create_triangulation(std::istream& in)
 	vertices_vector[0] = infinite_vertex();
 
 	double x, y;
+	double aux;
 	for(int i = 1; i < n; ++i){
-		in >> x >> y;
+		in >> x >> y >> aux;
 		// FIXME: Constructing a DT without info.
 		Vertex_with_info vi(Point(x,y));
 		Vertex_iterator vit = vertices().insert(vi);

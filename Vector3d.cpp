@@ -94,3 +94,13 @@ void Vector3d::normalize()
 	set_y( get_y()/abs );
 	set_z( get_z()/abs );
 }
+
+double Vector3d::squared_norm()
+{
+	return std::pow(_x, 2) + std::pow(_y, 2) + std::pow(_z, 2);
+}
+
+double Vector3d::norm()
+{
+	return std::sqrt(squared_norm());
+}

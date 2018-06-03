@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-	HODT t(0);
+	HODT t(10);
 	std::ifstream input("toys/KinzelSprings-VIP-3pct-rnd.cin");
 	int psize, aux1, aux2, aux3;
 	double x, y, info;
@@ -26,6 +26,8 @@ int main(int argc, char** argv)
 	Optimization_criteria c = ABN;
 	double max_abn = t.optimize(c);
 	std::cout << "Optimization done.\n\n";
+	std::cout << "Max aspect ratio = " << t.max_aspect_ratio() << "\n";
+	std::cout << "Avg aspect ratio = " << t.average_aspect_ratio() << "\n";
 
 	std::cout << "Checking final order.\n";
 	int order = t.brute_order();
@@ -34,6 +36,15 @@ int main(int argc, char** argv)
 	std::cout << "Outputting triangulation.n\n";
 	t.show_triangulation();
 	std::cout << "Done.\n";
+
+	//HODT dt(0);
+	//std::ifstream in("out_cgal.tri");
+
+	//dt.create_triangulation(in);
+	//std::cout << "\n-- New test --\n";
+	//std::cout << "Max aspect ratio = " << dt.max_aspect_ratio() << "\n";
+	//std::cout << "Avg aspect ratio = " << dt.average_aspect_ratio() << "\n";
+	//dt.show_triangulation("out_cgal.tri");
 
 	return 0;
 }

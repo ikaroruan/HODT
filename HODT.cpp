@@ -217,7 +217,7 @@ int HODT::face_order(Face_iterator fc)
 	int f_order = 0;
 	
 	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
-		if(vi != infinite_vertex()){
+		if(vi != infinite_vertex() && vi != fc->vertex(0) && vi != fc->vertex(1) && vi != fc->vertex(2)){
 			if(incircle_test(fc->vertex(0), fc->vertex(1), fc->vertex(2), vi) > 0)
 				f_order++;
 		}
@@ -280,6 +280,34 @@ double HODT::edge_length(Vertex_iterator v, Vertex_iterator u)
 			 std::pow(v->info() - u->info(), 2));
 }
 
+// Distante between point y and segment pr.
+double HODT::distance_point_segment(const Point& y, const Point& p, const Point& r)
+{
+	Vector3d d(r.get_x() - p.get_x(), r.get_y() - p.get_y(), 0);
+	d.normalize();
+	Vector3d u(y.get_x() - p.get_x(), y.get_y() - p.get_y(), 0);
+
+	return std::sqrt( u.squared_norm() - std::pow( d*u, 2));
+}
+
+// Calculating the Aspect Ratio.
+double HODT::aspect_ratio(Face_iterator fc)
+{
+	int j = 0; // Index to longest edge.
+	double max_length = 0;
+	for(int i = 0; i < 3; ++i){
+		double length = edge_length(fc, i);
+		if(length > max_length){
+			max_length = length;
+			j = i;
+		}
+	}
+
+	double s_distance = distance_point_segment(fc->vertex(j)->point(), fc->vertex(ccw(j))->point(),
+						  fc->vertex(cw(j))->point());
+	return (max_length/s_distance) - (2/std::sqrt(3));
+}
+
 // Weighted angle between normals, where the edge length is the weight.
 double HODT::wabn(Face_iterator fc, int i)
 {
@@ -310,6 +338,34 @@ bool HODT::convex_polygon(Face_iterator fc, Face_iterator ff)
 	// FIXME: If three points are collinear the faces still forms a convex polygon, 
 	// but this situation may not be useful for flipping faces.
 	return !((key1 > 0 && key2 > 0) || (key1 < 0 && key2 < 0));
+}
+
+double HODT::max_aspect_ratio()
+{
+	double max_aspect = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it) && valid_whole_boundary(it)){
+			double aspect = aspect_ratio(it);
+			if(aspect > max_aspect)
+				max_aspect = aspect;
+		}
+	}
+
+	return max_aspect;
+}
+
+double HODT::average_aspect_ratio()
+{
+	double sum = 0;
+	int count = 0;
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it) && valid_whole_boundary(it)){
+			sum += aspect_ratio(it);
+			count++;
+		}
+	}
+
+	return sum/(static_cast<double>(count));
 }
 
 double HODT::criteria_result(Face_iterator fc, int i, Optimization_criteria& c)
@@ -343,7 +399,7 @@ double HODT::global_min_criteria(Optimization_criteria& c)
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
 		if(!is_infinite(it)){
 			for(int i = 0; i < 3; ++i){
-				if(!is_infinite(it->neighbor(i))){
+				if(!is_infinite(it->neighbor(i)) && valid_whole_boundary(it) && valid_whole_boundary(it->neighbor(i))){
 					double abn_result = criteria_result(it, it->neighbor(i), c);
 					if(count == 0) min_face = abn_result;
 					count++;
@@ -363,7 +419,8 @@ double HODT::global_max_criteria(Optimization_criteria& c)
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
 		if(!is_infinite(it)){
 			for(int i = 0; i < 3; ++i){
-				if(!is_infinite(it->neighbor(i))){
+				if(convex_polygon(it, it->neighbor(i)) && !is_infinite(it->neighbor(i)) && 
+				   valid_whole_boundary(it) && valid_whole_boundary(it->neighbor(i))){
 					double abn_result = criteria_result(it, it->neighbor(i), c);
 					if(abn_result > max_face)
 						max_face = abn_result;
@@ -394,6 +451,51 @@ double HODT::global_average_criteria(Optimization_criteria& c)
 	return (sum/count);
 }
 
+bool HODT::valid_boundary(Face_iterator fc)
+{
+	if(is_infinite(fc))
+		return false;
+
+	// Checking the 5% distance.
+	for(int i = 0; i < 3; ++i){
+		if(is_infinite(fc->neighbor(i))){
+			double vertex_to_edge = distance_point_segment(fc->vertex(i)->point(), 
+						   		       fc->vertex(ccw(i))->point(),
+								       fc->vertex(cw(i))->point());
+			double e_length = edge_length(fc, i);
+			if(vertex_to_edge <= 0.05*e_length)
+				return false;
+
+		}
+	}
+
+	return true;
+}
+
+bool HODT::valid_whole_boundary(Face_iterator fc)
+{
+	Face_circulator ff(infinite_vertex());
+	Face_iterator begin = ff.current_face();
+
+	do{
+		Face_iterator fh = ff.current_face();
+		int index = fh->index(infinite_vertex());
+		double e_length = edge_length(fh, index);
+
+		for(int i = 0; i < 3; ++i){
+			double p_segment = distance_point_segment(fc->vertex(i)->point(),
+								  fh->vertex(ccw(index))->point(),
+								  fh->vertex(cw(index))->point());
+
+			if(p_segment < 0.05*e_length)
+				return false;
+		}
+		ff.next();
+	}while(ff.current_face() != begin);
+
+	return true;
+}
+
 double HODT::optimize(Optimization_criteria& c)
 {
 	int flips_count = 0;
@@ -418,7 +520,7 @@ double HODT::optimize(Optimization_criteria& c)
 
 		double max_face = 0;
 		if(!is_infinite(fc->neighbor(i))){
-			if(convex_polygon(fc, fc->neighbor(i))){
+			if(convex_polygon(fc, fc->neighbor(i)) && valid_whole_boundary(fc) && valid_whole_boundary(fc->neighbor(i))){
 				double initial_value = std::max(criteria_result(fc, i, c), 
 								std::max(criteria_result(fc, ccw(i), c), 
 								std::max(criteria_result(fc, cw(i), c), 
@@ -440,11 +542,10 @@ double HODT::optimize(Optimization_criteria& c)
 				else{ // Then, edge was optmized.
 					if(after_value < max_face)
 						max_face = after_value;
-					int j = fc->index(fn);
 					queue.push(std::make_pair(fc, ccw(fc->index(fn))));
 					queue.push(std::make_pair(fc, cw(fc->index(fn))));
-					queue.push(std::make_pair(fn, ccw(j)));
-					queue.push(std::make_pair(fc, cw(j)));
+					queue.push(std::make_pair(fn, ccw(fn->index(fc))));
+					queue.push(std::make_pair(fn, cw(fn->index(fc))));
 					flips_count++;
 				}
 			}
@@ -452,6 +553,7 @@ double HODT::optimize(Optimization_criteria& c)
 		if(max_face > max)
 			max = max_face;
 	}
+
 	std::cout << "Number of flips = " << flips_count << "\n";
 	double min = global_min_criteria(c);
 	double max_result = global_max_criteria(c);

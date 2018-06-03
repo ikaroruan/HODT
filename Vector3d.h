@@ -33,6 +33,8 @@ class Vector3d
 	// FUNCTIONS.
 	void print();
 	void normalize();
+	double squared_norm();
+	double norm();
 
 	private:
 	double _x;
