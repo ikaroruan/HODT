@@ -36,6 +36,8 @@ class HODT : public Delaunay_triangulation
 	double distance_point_segment(const Point& y, const Point& p, const Point& r);
 	bool valid_boundary(Face_iterator fc);
 	bool valid_whole_boundary(Face_iterator fc);
+	bool out_of_bound(Vertex_iterator v);
+	bool out_of_bound(Face_iterator fc);
 	double aspect_ratio(Face_iterator fc);
 	double max_aspect_ratio();
 	double average_aspect_ratio();
@@ -44,6 +46,9 @@ class HODT : public Delaunay_triangulation
 	double global_min_criteria(Optimization_criteria& c);
 	double global_max_criteria(Optimization_criteria& c);
 	double global_average_criteria(Optimization_criteria& c);
+	double elevation_from_face(Face_iterator fc, Point& p);
+	double rmse_point(Point& p, double actual_elev);
+	double rmse(std::vector<std::pair<Point, double>>& vec);
 	bool convex_polygon(Face_iterator fc, int i);
 	bool convex_polygon(Face_iterator fc, Face_iterator ff);
 	double optimize(Optimization_criteria& c);
@@ -53,11 +58,18 @@ class HODT : public Delaunay_triangulation
 	int order();
 	void max_order(int m_order);
 	int max_order();
+	void lb_tr_vertices();
 
 	void print_face(Face_iterator fc);
 
 	private:
 	int _max_order;
+	//Vertex_iterator _lb = nullptr;
+	//Vertex_iterator _tr = nullptr;
+	int _min_x = 0;
+	int _min_y = 0;
+	int _max_x = 0;
+	int _max_y = 0;
 };
 
 #endif

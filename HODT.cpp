@@ -217,7 +217,7 @@ int HODT::face_order(Face_iterator fc)
 	int f_order = 0;
 	
 	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
-		if(vi != infinite_vertex() && vi != fc->vertex(0) && vi != fc->vertex(1) && vi != fc->vertex(2)){
+		if(vi != infinite_vertex() && vi != fc->vertex(0) && vi != fc->vertex(1) && vi != fc->vertex(2) && !out_of_bound(vi)){
 			if(incircle_test(fc->vertex(0), fc->vertex(1), fc->vertex(2), vi) > 0)
 				f_order++;
 		}
@@ -230,9 +230,11 @@ int HODT::brute_order()
 {
 	int order = 0;
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
-		int f_order = face_order(it);
-		if(f_order > order)
-			order = f_order;
+		if(!out_of_bound(it)){
+			int f_order = face_order(it);
+			if(f_order > order)
+				order = f_order;
+		}
 	}
 
 	return order;
@@ -243,9 +245,11 @@ int HODT::order()
 	int t_order = 0;
 
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
-		int f_order = face_order(it);
-		if(f_order > t_order)
-			t_order = f_order;
+		if(!out_of_bound(it)){
+			int f_order = face_order(it);
+			if(f_order > t_order)
+				t_order = f_order;
+		}
 	}
 
 	return t_order;
@@ -344,7 +348,7 @@ double HODT::max_aspect_ratio()
 {
 	double max_aspect = 0;
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
-		if(!is_infinite(it) && valid_whole_boundary(it)){
+		if(!is_infinite(it) && !out_of_bound(it)){
 			double aspect = aspect_ratio(it);
 			if(aspect > max_aspect)
 				max_aspect = aspect;
@@ -359,7 +363,7 @@ double HODT::average_aspect_ratio()
 	double sum = 0;
 	int count = 0;
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
-		if(!is_infinite(it) && valid_whole_boundary(it)){
+		if(!is_infinite(it) && !out_of_bound(it)){
 			sum += aspect_ratio(it);
 			count++;
 		}
@@ -399,7 +403,7 @@ double HODT::global_min_criteria(Optimization_criteria& c)
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
 		if(!is_infinite(it)){
 			for(int i = 0; i < 3; ++i){
-				if(!is_infinite(it->neighbor(i)) && valid_whole_boundary(it) && valid_whole_boundary(it->neighbor(i))){
+				if(!is_infinite(it->neighbor(i)) && !out_of_bound(it) && !out_of_bound(it->neighbor(i))){
 					double abn_result = criteria_result(it, it->neighbor(i), c);
 					if(count == 0) min_face = abn_result;
 					count++;
@@ -420,7 +424,7 @@ double HODT::global_max_criteria(Optimization_criteria& c)
 		if(!is_infinite(it)){
 			for(int i = 0; i < 3; ++i){
 				if(convex_polygon(it, it->neighbor(i)) && !is_infinite(it->neighbor(i)) && 
-				   valid_whole_boundary(it) && valid_whole_boundary(it->neighbor(i))){
+				   !out_of_bound(it) && !out_of_bound(it->neighbor(i))){
 					double abn_result = criteria_result(it, it->neighbor(i), c);
 					if(abn_result > max_face)
 						max_face = abn_result;
@@ -472,6 +476,158 @@ bool HODT::valid_boundary(Face_iterator fc)
 	return true;
 }
 
+void HODT::lb_tr_vertices()
+{
+	Vertex_iterator v = vertices().begin();
+	Vertex_iterator lb = v == infinite_vertex() ? ++v : v;
+	Vertex_iterator tr = v;
+	double max_length = 0;
+	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
+		for(Vertex_iterator vt = vertices().begin(); vt != vertices().end(); ++vt)
+		{
+			if(vt != infinite_vertex() && vi != infinite_vertex()){
+				if(edge_length(vi, vt) > max_length){
+					lb = vi;
+					tr = vt;
+					max_length = edge_length(vi, vt);
+				}
+			}
+		}
+		/*if(vi != infinite_vertex()){
+
+			if(vi->point().get_x() <= lb->point().get_x() && vi->point().get_y() <= lb->point().get_y()){
+				lb = vi;
+			}
+			if(vi->point().get_x() >= tr->point().get_x() && vi->point().get_y() >= tr->point().get_y()){
+				std::cout << "Hey " << vi->point().get_x() << "\n";
+				tr = vi;
+			}
+		}*/
+	}
+
+	if(lb->point().get_x() > tr->point().get_x())
+		std::swap(lb, tr);
+
+	//_tr = tr;
+	//_lb = lb;
+	//std::cout << "lb: x = " << lb->point().get_x() << "   y = " << lb->point().get_y() << "\n";
+	//std::cout << "tr: x = " << tr->point().get_x() << "   y = " << tr->point().get_y() << "\n";
+
+	/*double min_x = 0;
+	double min_y = 0;
+	double max_x = 0;
+	double max_y = 0;
+	int count = 0;
+	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
+		if(vi != infinite_vertex()){
+			if(count == 0){ // Initialize min values.
+				min_x = vi->point().get_x();
+				min_y = vi->point().get_y();
+				count++;
+			}
+
+			if(min_x > vi->point().get_x())
+				min_x = vi->point().get_x();
+			if(max_x < vi->point().get_x())
+				max_x = vi->point().get_x();
+			if(min_y > vi->point().get_y())
+				min_y = vi->point().get_y();
+			if(max_y < vi->point().get_y())
+				max_y = vi->point().get_y();
+		}
+	}
+
+	_min_x = min_x;
+	_min_y = min_y;
+	_max_x = max_x;
+	_max_y = max_y;*/
+
+	// Finding vertex with longest distance from lb
+	/*double max_dist = 0;
+	for(Vertex_iterator vi = vertices().begin(); vi != vertices().end(); ++vi){
+		if(vi != infinite_vertex()){
+			double length = edge_length(lb, vi);
+			if(length > max_dist){
+				tr = vi;
+				max_dist = length;
+			}
+		}
+	}*/
+
+	_min_x = lb->point().get_x();
+	_min_y = lb->point().get_y();
+	_max_x = tr->point().get_x();
+	_max_y = tr->point().get_y();
+}
+
+bool HODT::out_of_bound(Vertex_iterator v)
+{
+	if(_min_x == 0 && _min_y == 0 && _max_x == 0 && _max_y == 0)
+		lb_tr_vertices();
+
+	double percent = 0.05;
+	double width = _max_x - _min_x;
+	double height = _max_y - _min_y;
+	if(v->point().get_x() < _min_x + percent*width)
+		return true;
+	if(v->point().get_x() > _max_x - percent*width)
+		return true;
+	if(v->point().get_y() < _min_y + percent*height)
+		return true;
+	if(v->point().get_y() > _max_y - percent*height)
+		return true;
+	
+	return false;
+}
+
+double HODT::elevation_from_face(Face_iterator fc, Point& p)
+{
+	Vector3d u(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info());
+	Vector3d v(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info());
+	Vector3d w(fc->vertex(2)->point().get_x(), fc->vertex(2)->point().get_y(), fc->vertex(2)->info());
+	
+	Vector3d vu = v - u;
+	Vector3d wv = w - v;
+
+	Vector3d normal = vu.cross_product(wv);
+	std::cout << "Normal = ";
+	normal.print();
+
+	return ((-1 * normal.get_x() * p.get_x()) + (normal.get_x() * u.get_x()) - (normal.get_y() * p.get_y()) + 
+		(normal.get_y() * u.get_y()) + (normal.get_z() * u.get_z()))/normal.get_z();
+}
+
+double HODT::rmse_point(Point& p, double actual_elev)
+{
+	Vertex_location lc;
+	int li = -1;
+	Face_iterator fc = locate(p, lc, li);
+	if(is_infinite(fc))
+		fc = fc->neighbor(fc->index(infinite_vertex()));
+
+	double el = elevation_from_face(fc, p);
+
+	return std::pow(el - actual_elev, 2);
+}
+
+double HODT::rmse(std::vector<std::pair<Point, double>>& vec)
+{
+	double sq_diff = 0;
+	for(std::vector<std::pair<Point, double>>::iterator it = vec.begin(); it != vec.end(); ++it){
+		std::pair<Point, double> pair = *it;
+		Point p = std::get<0>(pair);
+		double actual_elev = std::get<1>(pair);
+		sq_diff += rmse_point(p, actual_elev);
+	}
+
+	return std::sqrt(sq_diff/vec.size());
+}
+
+bool HODT::out_of_bound(Face_iterator fc)
+{
+	return (out_of_bound(fc->vertex(0)) || out_of_bound(fc->vertex(1)) || out_of_bound(fc->vertex(2)));
+}
+
 bool HODT::valid_whole_boundary(Face_iterator fc)
 {
 	Face_circulator ff(infinite_vertex());
@@ -505,7 +661,7 @@ double HODT::optimize(Optimization_criteria& c)
 	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
 		if(!is_infinite(it)){
 			for(int i = 0; i < 3; ++i){
-				if(!is_infinite(it->neighbor(i))){
+				if(!is_infinite(it->neighbor(i)) && !out_of_bound(it)){
 					queue.push(std::make_pair(it, i));
 				}
 			}
@@ -517,10 +673,9 @@ double HODT::optimize(Optimization_criteria& c)
 		Face_iterator fc = std::get<0>(pair);
 		int i = std::get<1>(pair);
 		queue.pop();
-
 		double max_face = 0;
-		if(!is_infinite(fc->neighbor(i))){
-			if(convex_polygon(fc, fc->neighbor(i)) && valid_whole_boundary(fc) && valid_whole_boundary(fc->neighbor(i))){
+		if(!is_infinite(fc) && !is_infinite(fc->neighbor(i))){
+			if(convex_polygon(fc, fc->neighbor(i)) && !out_of_bound(fc) && !out_of_bound(fc->neighbor(i))){
 				double initial_value = std::max(criteria_result(fc, i, c), 
 								std::max(criteria_result(fc, ccw(i), c), 
 								std::max(criteria_result(fc, cw(i), c), 
@@ -553,6 +708,7 @@ double HODT::optimize(Optimization_criteria& c)
 		if(max_face > max)
 			max = max_face;
 	}
+	
 
 	std::cout << "Number of flips = " << flips_count << "\n";
 	double min = global_min_criteria(c);

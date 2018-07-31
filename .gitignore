@@ -5,10 +5,8 @@ cmake_install.cmake
 CMakeFiles/
 triangulate
 toys/
-<<<<<<< HEAD
 toys/*
 showme
 test_triangulate
-=======
 showme
->>>>>>> 6f0251c873a0c008a70b208fa7173c75eeb26026
+maps/*

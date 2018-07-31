@@ -35,6 +35,7 @@ class Vector3d
 	void normalize();
 	double squared_norm();
 	double norm();
+	Vector3d cross_product(Vector3d& v);
 
 	private:
 	double _x;

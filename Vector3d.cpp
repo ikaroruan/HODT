@@ -104,3 +104,10 @@ double Vector3d::norm()
 {
 	return std::sqrt(squared_norm());
 }
+
+Vector3d Vector3d::cross_product(Vector3d& v)
+{
+	return Vector3d(get_y() * v.get_z() - get_z() * v.get_y(),
+			get_z() * v.get_x() - get_x() * v.get_z(),
+			get_x() * v.get_y() - get_y() * v.get_x());
+}
