@@ -323,6 +323,53 @@ double HODT::wabn(Face_iterator fc, Face_iterator ff)
 	return edge_length(fc, fc->index(ff)) * abn(fc, ff);
 }
 
+// Calculating the Jump Normal Derivative - N2y) * normal.get_y());.
+double HODT::jnd(Face_iterator fc, Face_iterator ff)
+{
+	return jnd(fc, fc->index(ff));
+}
+
+double HODT::jnd(Face_iterator fc, int i)
+{
+	Vertex_iterator v = fc->vertex(ccw(i));
+	Vertex_iterator u = fc->vertex(cw(i));
+
+	std::cout << "  v: x = " << v->point().get_x() << "   y = " << v->point().get_y() << "\n";
+	std::cout << "  u: x = " << u->point().get_x() << "   y = " << u->point().get_y() << "\n";
+	
+	Vector3d normal(-1*(u->point().get_y() - v->point().get_y()), 
+			u->point().get_x() - v->point().get_x(), 0);
+	normal.normalize();
+	normal.print();
+
+	Vertex_iterator w1 = fc->vertex(i);
+	Vertex_iterator w2 = fc->neighbor(i)->vertex(mirror_index(fc, i));
+
+	Vector3d uv(u->point().get_x() - v->point().get_x(),
+		    u->point().get_y() - v->point().get_y(),
+		    u->info() - v->info());
+	Vector3d w1v(w1->point().get_x() - v->point().get_x(),
+		     w1->point().get_y() - v->point().get_y(),
+		     w1->info() - v->info());
+	Vector3d w2v(w2->point().get_x() - v->point().get_x(),
+		     w2->point().get_y() - v->point().get_y(),
+		     w2->info() - v->info());
+	uv.print();
+	w1v.print();
+	w2v.print();
+
+	double N1x = uv.get_y() * w1v.get_z() - uv.get_z() * w1v.get_y();
+	double N1y = uv.get_z() * w1v.get_x() - uv.get_x() * w1v.get_z();
+	double N2x = uv.get_y() * w2v.get_z() - uv.get_z() * w2v.get_y();
+	double N2y = uv.get_z() * w2v.get_x() - uv.get_x() * w2v.get_z();
+	std::cout << "N1x = " << N1x << "\n";
+	std::cout << "N1y = " << N1y << "\n";
+	std::cout << "N2x = " << N2x << "\n";
+	std::cout << "N2y = " << N2y << "\n";
+
+	return std::abs((N1x - N2x) * normal.get_x() - (N1y - N2y) * normal.get_y());
+}
+
 // Checking wheter or not two faces forms a convex polygon.
 bool HODT::convex_polygon(Face_iterator fc, int i)
 {
@@ -386,6 +433,9 @@ double HODT::criteria_result(Face_iterator fc, Face_iterator ff, Optimization_cr
 			break;
 		case WABN:
 			return wabn(fc, ff);
+			break;
+		case JND:
+			return jnd(fc, ff);
 			break;
 		default:
 			std::cerr << "ERROR: Wrong optimization criteria. (criteria_result function)\n";
@@ -590,8 +640,6 @@ double HODT::elevation_from_face(Face_iterator fc, Point& p)
 	Vector3d wv = w - v;
 
 	Vector3d normal = vu.cross_product(wv);
-	std::cout << "Normal = ";
-	normal.print();
 
 	return ((-1 * normal.get_x() * p.get_x()) + (normal.get_x() * u.get_x()) - (normal.get_y() * p.get_y()) + 
 		(normal.get_y() * u.get_y()) + (normal.get_z() * u.get_z()))/normal.get_z();
@@ -650,6 +698,94 @@ bool HODT::valid_whole_boundary(Face_iterator fc)
 	}while(ff.current_face() != begin);
 
 	return true;
+}
+
+bool HODT::locally_optimal(Optimization_criteria& c)
+{
+	for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+		if(!is_infinite(it)){
+			for(int i = 0; i < 3; ++i){ // Iterating over the three neighbors. For now, it's okay to double check an edge.
+				if(!is_infinite(it->neighbor(i))){
+					if(convex_polygon(it, it->neighbor(i)) && !out_of_bound(it) && !out_of_bound(it->neighbor(i))){
+						double initial_value = std::max(criteria_result(it, i, c), 
+									std::max(criteria_result(it, ccw(i), c), 
+									std::max(criteria_result(it, cw(i), c), 
+									std::max(criteria_result(it->neighbor(i), ccw(mirror_index(it, i)), c),
+										 criteria_result(it->neighbor(i), cw(mirror_index(it, i)), c)))));
+						Face_iterator fn = it->neighbor(i);
+						flip(it, i); // Performing the flip here.
+						int it_order = face_order(it);
+						int fn_order = face_order(fn);
+						double after_value = std::max(criteria_result(it, it->index(fn), c),
+									std::max(criteria_result(it, ccw(it->index(fn)), c),
+									std::max(criteria_result(it, cw(it->index(fn)), c),
+									std::max(criteria_result(fn, ccw(fn->index(it)), c),
+										 criteria_result(fn, cw(fn->index(it)), c)))));
+						flip(it, it->index(fn)); // Undoing the flip.
+
+						if(it_order <= max_order() && fn_order <= max_order() && after_value < initial_value){
+							std::cout << "== This is " << i << " ==\n";
+							std::cout << "it_order = " << it_order << "\n";
+							std::cout << "fn_order = " << fn_order << "\n";
+							std::cout << "max_order = " << max_order() << "\n";
+							std::cout << "initial_value = " << initial_value << "\n";
+							std::cout << "after_value = " << after_value << "\n\n";
+							return false; // Optimization is possible, so the triangulation is not locally optimal.
+						}
+					}
+				}
+			} // End of inner for.
+		}
+	} // End of outer for.
+	
+	std::cout << "GOT IT TRUE.\n";
+	return true;
+}
+
+void HODT::optimize_brute_force(Optimization_criteria& c)
+{
+	int flips_count = 0;
+	int count = 0;
+
+	while(!locally_optimal(c))
+	{
+		for(Face_iterator it = faces().begin(); it != faces().end(); ++it){
+			if(!is_infinite(it)){
+				for(int i = 0; i < 3; ++i){ // Iterating over the three neighbors. For now, it's okay to double check an edge.
+					if(!is_infinite(it->neighbor(i))){
+						if(convex_polygon(it, it->neighbor(i)) && !out_of_bound(it) && !out_of_bound(it->neighbor(i))){
+							double initial_value = std::max(criteria_result(it, i, c), 
+										std::max(criteria_result(it, ccw(i), c), 
+										std::max(criteria_result(it, cw(i), c), 
+										std::max(criteria_result(it->neighbor(i), ccw(mirror_index(it, i)), c),
+											 criteria_result(it->neighbor(i), cw(mirror_index(it, i)), c)))));
+							Face_iterator fn = it->neighbor(i);
+							flip(it, i); // Performing the flip here.
+							double after_value = std::max(criteria_result(it, it->index(fn), c),
+										std::max(criteria_result(it, ccw(it->index(fn)), c),
+										std::max(criteria_result(it, cw(it->index(fn)), c),
+										std::max(criteria_result(fn, ccw(fn->index(it)), c),
+											 criteria_result(fn, cw(fn->index(it)), c)))));
+							int it_order = face_order(it);
+							int fn_order = face_order(fn);
+							if(it_order <= max_order() && fn_order <= max_order() && after_value < initial_value){ // Edge optimized.
+								count++;
+								flips_count++;}
+							else // Undo the flip.
+								flip(it, it->index(fn));
+						}
+					}
+				} // End of inner for.
+			}
+		} // End of outer for.
+	} // End of while.
+	std::cout << "Number of flips = " << flips_count << "\n";
+	double min = global_min_criteria(c);
+	double max_result = global_max_criteria(c);
+	double average_result = global_average_criteria(c);
+	std::cout << "Min ABN = " << min << "\n";
+	std::cout << "Max ABN = " << max_result << "\n";
+	std::cout << "Average ABN = " << average_result << "\n";
 }
 
 double HODT::optimize(Optimization_criteria& c)

@@ -9,7 +9,7 @@
 #include "Point_with_info.h"
 
 typedef enum{
-	ABN, WABN
+	ABN, WABN, JND
 } Optimization_criteria;
 
 class HODT : public Delaunay_triangulation
@@ -31,6 +31,8 @@ class HODT : public Delaunay_triangulation
 	double abn(Face_iterator fc, Face_iterator ff);
 	double wabn(Face_iterator fc, int i);
 	double wabn(Face_iterator fc, Face_iterator ff);
+	double jnd(Face_iterator fc, int i);
+	double jnd(Face_iterator fc, Face_iterator ff);
 	double edge_length(Face_iterator fc, int i);
 	double edge_length(Vertex_iterator v, Vertex_iterator u);
 	double distance_point_segment(const Point& y, const Point& p, const Point& r);
@@ -52,6 +54,8 @@ class HODT : public Delaunay_triangulation
 	bool convex_polygon(Face_iterator fc, int i);
 	bool convex_polygon(Face_iterator fc, Face_iterator ff);
 	double optimize(Optimization_criteria& c);
+	bool locally_optimal(Optimization_criteria& c);
+	void optimize_brute_force(Optimization_criteria& c);
 
 	int face_order(Face_iterator fc);
 	int brute_order();
