@@ -267,6 +267,10 @@ double HODT::abn(Face_iterator fc, Face_iterator ff)
 	Vector3d n2 = ff->unit_normal();
 
 	double dot_product = n1 * n2;
+	//std::cout << "dot_product = " << std::setprecision(20) << dot_product << "\n";
+	//std::cout << "acos = " << std::setprecision(20) << std::acos(dot_product) << "\n\n";
+
+	if(dot_product >= 1) return 0;
 
 	return std::acos(dot_product) * (180.0/boost::math::constants::pi<double>());
 }
@@ -476,8 +480,9 @@ double HODT::global_max_criteria(Optimization_criteria& c)
 				if(convex_polygon(it, it->neighbor(i)) && !is_infinite(it->neighbor(i)) && 
 				   !out_of_bound(it) && !out_of_bound(it->neighbor(i))){
 					double abn_result = criteria_result(it, it->neighbor(i), c);
-					if(abn_result > max_face)
+					if(abn_result > max_face){
 						max_face = abn_result;
+					}
 				}
 			}
 		}
@@ -826,7 +831,7 @@ double HODT::optimize(Optimization_criteria& c)
 							      	       criteria_result(fn, cw(fn->index(fc)), c)))));
 				int fc_order = face_order(fc);
 				int fn_order = face_order(fn);
-				if(fc_order > max_order() || fn_order > max_order() || after_value > initial_value){
+				if(fc_order > max_order() || fn_order > max_order() || after_value >= initial_value){
 					flip(fc, fc->index(fn));
 					if(initial_value > max_face) max_face = initial_value;
 				}
@@ -838,6 +843,26 @@ double HODT::optimize(Optimization_criteria& c)
 					queue.push(std::make_pair(fn, ccw(fn->index(fc))));
 					queue.push(std::make_pair(fn, cw(fn->index(fc))));
 					flips_count++;
+					std::cout << "\r" << flips_count << std::flush;
+
+					if(flips_count >= 10000 && flips_count <= 10005){
+						std::cout << "\n\n";
+						print_face(fc);
+						std::cout << "\n";
+						print_face(fn);
+						std::cout << "\n";
+						print_face(fc->neighbor(ccw(fc->index(fn))));
+						std::cout << "\n";
+						print_face(fc->neighbor(cw(fc->index(fn))));
+						std::cout << "\n";
+						print_face(fn->neighbor(ccw(fn->index(fc))));
+						std::cout << "\n";
+						print_face(fn->neighbor(cw(fn->index(fc))));
+						std::cout << "Initial value = " << initial_value << "\n";
+						std::cout << "After value = " << after_value << "\n";
+						std::cout << "\n------------------------\n";
+						std::cout << "\n\n";
+					}
 				}
 			}
 		}

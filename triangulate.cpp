@@ -6,160 +6,114 @@
 
 #include "HODT.h"
 
+void output_results(std::ostream& out, int max_order, double abn1, double abn2,
+		    double avg_aratio1, double avg_aratio2, int order1, int order2,
+		    double elapsed1, double elapsed2){
+	out << std::setw(8)  << max_order
+	    << std::setw(12) << abn1
+	    << std::setw(12) << abn2
+	    << std::setw(13) << avg_aratio1
+	    << std::setw(13) << avg_aratio2
+	    << std::setw(8)  << order1
+	    << std::setw(8)  << order2
+	    << std::setw(12) << elapsed1
+	    << std::setw(12) << elapsed2
+	    << std::endl;
+}
+
+void output_header(std::ostream& out){
+	out << std::setw(8)  << "K-ORDER"
+	    << std::setw(12) << "ABN1"
+	    << std::setw(12) << "ABN2"
+	    << std::setw(13) << "AVG.ASPR1"
+	    << std::setw(13) << "AVG.ASPR2"
+	    << std::setw(8)  << "ORDER1"
+	    << std::setw(8)  << "ORDER2"
+	    << std::setw(12) << "E.TIME1"
+	    << std::setw(12) << "E.TIME2"
+	    << std::endl;
+}
+
 int main(int argc, char** argv)
 {
-	/*Point p1(0,0);
-	Point p2(1, 0);
-	Point p3(0, 1);
-	Point p4(1, 1);
-	HODT t;
-
-	t.insert(p1);
-	t.insert(p2);
-	Vertex_iterator v = t.insert(p3);
-	t.insert(p4);
-	Face_iterator fc = v->incident_face();
-	Face_iterator fn = nullptr;
-	int j = -1;
-
-	if(t.is_infinite(fc))
-		std::cout << "ERROR: fc is infinite.\n";
-	else{
-		for(int i = 0; i < 3; ++i){
-			if(!t.is_infinite(fc->neighbor(i))){
-				fn = fc->neighbor(i);
-				//t.flip(fc, i);
-			}
-		}
-	}
-	j = fc->index(fn);
-	std::cout << "The number is " << j << "\n";
-	//t.flip(fc, fc->index(fn));
-	
-	t.show_triangulation();
-	t.output_triangulation();
-
-	return 0;*/
-	
-	/*HODT t;
-	Point a(1, 1);
-	Point b(2, 2);
-	Point c(2, -2);
-	Point d(3, 2);
-
-	Vertex_iterator v = nullptr;
-	Vertex_iterator vi = nullptr;
-	v = t.insert(a);
-	v->info(0.75);
-	v = t.insert(b);
-	v->info(0.77);
-	v = t.insert(c);
-	v->info(0.80);
-	vi = v;
-	v = t.insert(d);
-	v->info(0.75);
-	
-	Face_iterator fci = v->incident_face();
-	Face_iterator fc = nullptr;
-	for(int i = 0; i < 3; ++i){
-		if(!t.is_infinite(fci->neighbor(i)))
-			fc = fci->neighbor(i);
-	}
-	t.print_face(fc);
-
-	Face_iterator ff = nullptr;
-	for(int i = 0; i < 3; ++i){
-		if(t.is_infinite(fc->neighbor(i)))
-			std::cout << "Infinite_neighbor.\n";
-		else{
-			ff = fc->neighbor(i);
-			std::cout << "Finite neighbor found.\n";
-		}
-	}
-	t.print_face(ff);
-	if(ff == nullptr){
-		std::cout << "ERROR! No finite neighbor found.\n";
-		return 0;
-	}
-
-	Optimization_criteria cr = JND;
-
-	double jnd_result = t.criteria_result(fc, ff, cr);
-
-	std::cout << "JND = " << std::fixed << std::setprecision(10) << jnd_result << "\n";
-	t.output_triangulation();
-	t.show_triangulation();*/
-
-
-
 	if(argc < 4){
-		std::cerr << "Not enough arguments.\n";
+		std::cout << "Not enough arguments!\n";
+		std::cout << "Usage: ./triangulate FILE_TO_BE_TRIANGULATED GROUND_TRUTH_POINTS OUTPUT_FILE\n";
 		return 0;
 	}
-	std::string tfilename = argv[1];
-	int input_order = std::atof(argv[2]);
-	std::string test_filename = argv[3];
-	HODT t(input_order);
-	std::ifstream input(tfilename);
-	std::ifstream test_file(test_filename);
-	int psize, aux1, aux2, aux3;
-	double x, y, info;
 
-	input >> psize >> aux1 >> aux2 >> aux3;
-	std::cout << "Constructing Triangulation.\n";
-	for(int i = 0; i < psize; ++i){
-		input >> x >> y >> info;
-		Point p(x, y);
-		Vertex_iterator v = t.insert(p);
-		v->info(info);
+	// File handling.
+	std::string filename = argv[1];
+	std::string gtruth_filename = argv[2];
+	std::string out_filename = argv[3];
+	std::ifstream file(filename);
+	std::ifstream gtruth_file(gtruth_filename);
+	std::ofstream out_file(out_filename);
+
+	output_header(out_file);
+	int final_order = 10;
+
+	for(int i = 0; i <= final_order; ++i){
+		std::cout << " -- RUN " << i << " --\n";
+
+		HODT t1(i);
+		HODT t2(i);
+		
+		// Reading input files.
+		int aux1, aux2, aux3, size;
+		double x, y, nn;
+		file >> size >> aux1 >> aux2 >> aux3;
+		for(int i = 0; i < size; ++i){
+			file >> nn >> x >> y;
+			Point p(x, y);
+			Vertex_iterator v1 = t1.insert(p);
+			Vertex_iterator v2 = t2.insert(p);
+			v1->info( std::pow(x, 2) + std::pow(y, 2) );
+			v2->info( std::pow(x, 2) + std::pow(y, 2) );
+		}
+		std::cout << "Insertion done.\n";
+
+		Optimization_criteria c = ABN;
+		std::chrono::high_resolution_clock::time_point start;
+		std::chrono::high_resolution_clock::time_point end;
+		std::chrono::duration<double> elapsed1;
+		std::chrono::duration<double> elapsed2;
+
+		// Optimizing both triangulations.
+		std::cout << "Initializing optimization.\n";
+		start = std::chrono::high_resolution_clock::now();
+		t1.optimize(c);
+		end = std::chrono::high_resolution_clock::now();
+		elapsed1 = end - start;
+		std::cout << "Optimization done.\n";
+
+		std::cout << "Starting brute force optimization.\n";
+		start = std::chrono::high_resolution_clock::now();
+		t2.optimize_brute_force(c);
+		end = std::chrono::high_resolution_clock::now();
+		elapsed2 = end - start;
+		std::cout << "Optimization done.\n";
+		
+		// Obtaining the results.	
+		double abn1 = t1.global_max_criteria(c);
+		double abn2 = t2.global_max_criteria(c);
+		double avg_aratio1 = t1.average_aspect_ratio();
+		double avg_aratio2 = t2.average_aspect_ratio();
+		int order1 = t1.brute_order();
+		int order2 = t2.brute_order();
+		
+		output_results(out_file, i, abn1, abn2, avg_aratio1, avg_aratio2, order1, order2,
+			       elapsed1.count(), elapsed2.count());
+		std::cout << "Results written.\n\n";
+
+		// Going back the beginning of the file.
+		file.clear();
+		file.seekg(0, std::ios::beg);
+
+		// Outputting the triangulation.
+		std::string name =  std::to_string(i); 
+		t1.show_triangulation(name);
 	}
-	std::cout << "Done.\n";
-
-	std::cout << "Populating vector with ground truth points.\n";
-	std::vector<std::pair<Point, double>> vec;
-	test_file >> psize >> aux1 >> aux2 >> aux3;
-	for(int i = 0; i < psize; ++i){
-		test_file >> x >> y >> info;
-		Point p(x, y);
-		vec.push_back(std::make_pair(p, info));
-	}
-	std::cout << "Done!\n";
-
-	std::cout << "\nOptimizing triangulation with JND criteria\n";
-	Optimization_criteria c = JND;
-	std::chrono::high_resolution_clock::time_point start;
-	std::chrono::high_resolution_clock::time_point end;
-	std::chrono::duration<double> elapsed;
-
-	start = std::chrono::high_resolution_clock::now();
-	t.optimize_brute_force(c);
-	end = std::chrono::high_resolution_clock::now();
-	elapsed = end - start;
-	std::cout << "Optimization done.\n\n";
-	std::cout << "Running time = " << elapsed.count() << "s.\n";
-	std::cout << "Max aspect ratio = " << t.max_aspect_ratio() << "\n";
-	std::cout << "Avg aspect ratio = " << t.average_aspect_ratio() << "\n\n";
-
-	std::cout << "Calculating the RMSE...\n";
-	double RMSE = t.rmse(vec);
-	std::cout << "RMSE = " << RMSE << "\n";
-
-	std::cout << "Checking final order.\n";
-	int order = t.brute_order();
-	std::cout << "Order = " << order << "\n\n";
-
-	std::cout << "Outputting triangulation.n\n";
-	t.show_triangulation();
-	std::cout << "Done.\n";
-
-	//HODT dt(0);
-	//std::ifstream in("out_cgal.tri");
-
-	//dt.create_triangulation(in);
-	//std::cout << "\n-- New test --\n";
-	//std::cout << "Max aspect ratio = " << dt.max_aspect_ratio() << "\n";
-	//std::cout << "Avg aspect ratio = " << dt.average_aspect_ratio() << "\n";
-	//dt.show_triangulation("out_cgal.tri");
-
+	
 	return 0;
 }
