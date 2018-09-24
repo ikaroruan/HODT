@@ -125,8 +125,8 @@ int main(int argc, char** argv)
 	}
 	std::cout << "Done!\n";
 
-	std::cout << "\nOptimizing triangulation with ABN criteria\n";
-	Optimization_criteria c = ABN;
+	std::cout << "\nOptimizing triangulation with JND criteria\n";
+	Optimization_criteria c = JND;
 	std::chrono::high_resolution_clock::time_point start;
 	std::chrono::high_resolution_clock::time_point end;
 	std::chrono::duration<double> elapsed;
