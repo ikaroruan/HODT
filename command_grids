@@ -1,0 +1,44 @@
+#!/bin/bash
+mkdir results
+echo "============== STARTING FILE 1 OF 5 =============="
+./triangulate toys/grid4.node toys/grid4.node example.txt
+cd results/grids/
+mkdir grid4
+cd ../../
+mv *_out.* results/grids/grid4/
+mv example.txt results/grids/grid4/
+
+
+echo "============== STARTING FILE 2 OF 5 =============="
+./triangulate toys/grid6.node toys/grid6.node example.txt
+cd results/grids/
+mkdir grid6
+cd ../../
+mv *_out.* results/grids/grid6/
+mv example.txt results/grids/grid6/
+
+echo "============== STARTING FILE 3 OF 5 =============="
+./triangulate toys/grid8.node toys/grid8.node example.txt
+cd results/grids/
+mkdir grid8
+cd ../../
+mv *_out.* results/grids/grid8/
+mv example.txt results/grids/grid8/
+
+echo "============== STARTING FILE 4 OF 5 =============="
+./triangulate toys/grid10.node toys/grid10.node example.txt
+cd results/grids/
+mkdir grid10
+cd ../../
+mv *_out.* results/grids/grid10/
+mv example.txt results/grids/grid10/
+
+echo "============== STARTING FILE 5 OF 5 =============="
+./triangulate toys/grid12.node toys/grid12.node example.txt
+cd results/grids/
+mkdir grid12
+cd ../../
+mv *_out.* results/grids/grid12/
+mv example.txt results/grids/grid12/
+
+echo "============== DONE =============="
