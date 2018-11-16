@@ -7,7 +7,7 @@
 #include "HODT.h"
 
 void output_results(std::ostream& out, int max_order, double abn1, double abn2,
-		    double avg_aratio1, double avg_aratio2, int order1, int order2,
+		    double avg_aratio1, double avg_aratio2, int order1, double order2,
 		    double elapsed1, double elapsed2){
 	out << std::setw(8)  << max_order
 	    << std::setw(12) << abn1
@@ -28,7 +28,7 @@ void output_header(std::ostream& out){
 	    << std::setw(13) << "AVG.ASPR1"
 	    << std::setw(13) << "AVG.ASPR2"
 	    << std::setw(8)  << "ORDER1"
-	    << std::setw(8)  << "ORDER2"
+	    << std::setw(8)  << "RMSE"
 	    << std::setw(12) << "E.TIME1"
 	    << std::setw(12) << "E.TIME2"
 	    << std::endl;
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	std::ofstream out_file(out_filename);
 
 	output_header(out_file);
-	int final_order = 10;
+	int final_order = 20;
 
 	for(int i = 0; i <= final_order; ++i){
 		std::cout << " -- RUN " << i << " --\n";
@@ -61,19 +61,19 @@ int main(int argc, char** argv)
 		
 		// Reading input files.
 		int aux1, aux2, aux3, size;
-		double x, y, nn;
+		double x, y, info;
 		file >> size >> aux1 >> aux2 >> aux3;
 		for(int i = 0; i < size; ++i){
-			file >> nn >> x >> y;
+			file >> x >> y >> info;
 			Point p(x, y);
 			Vertex_iterator v1 = t1.insert(p);
-			Vertex_iterator v2 = t2.insert(p);
-			v1->info( std::pow(x, 2) + std::pow(y, 2) );
-			v2->info( std::pow(x, 2) + std::pow(y, 2) );
+			v1->info(info);
+			//Vertex_iterator v2 = t2.insert(p);
+			//v2->info(info);
 		}
 		std::cout << "Insertion done.\n";
 
-		Optimization_criteria c = ABN;
+		Optimization_criteria c = JND;
 		std::chrono::high_resolution_clock::time_point start;
 		std::chrono::high_resolution_clock::time_point end;
 		std::chrono::duration<double> elapsed1;
@@ -87,28 +87,40 @@ int main(int argc, char** argv)
 		elapsed1 = end - start;
 		std::cout << "Optimization done.\n";
 
-		std::cout << "Starting brute force optimization.\n";
+		/*std::cout << "Starting brute force optimization.\n";
 		start = std::chrono::high_resolution_clock::now();
 		t2.optimize_brute_force(c);
 		end = std::chrono::high_resolution_clock::now();
 		elapsed2 = end - start;
-		std::cout << "Optimization done.\n";
+		std::cout << "Optimization done.\n";*/
 		
 		// Obtaining the results.	
 		double abn1 = t1.global_max_criteria(c);
-		double abn2 = t2.global_max_criteria(c);
+		//double abn2 = t2.global_max_criteria(c);
 		double avg_aratio1 = t1.average_aspect_ratio();
-		double avg_aratio2 = t2.average_aspect_ratio();
+		//double avg_aratio2 = t2.average_aspect_ratio();
 		int order1 = t1.brute_order();
-		int order2 = t2.brute_order();
+		//int order2 = t2.brute_order();
 		
-		output_results(out_file, i, abn1, abn2, avg_aratio1, avg_aratio2, order1, order2,
-			       elapsed1.count(), elapsed2.count());
+		gtruth_file >> size >> aux1 >> aux2 >> aux3;
+		std::vector<std::pair<Point, double>> vec;
+		for(int i = 0; i < size; ++i){
+			gtruth_file >> x >> y >> info;
+			Point p(x, y);
+			vec.push_back(std::make_pair(p, info));
+		}
+		double rmse1 = t1.rmse(vec);
+		std::cout << "RMSE = " << rmse1 << "\n";
+		
+		output_results(out_file, i, abn1, abn1, avg_aratio1, avg_aratio1, order1, rmse1,
+			       elapsed1.count(), elapsed1.count());
 		std::cout << "Results written.\n\n";
 
 		// Going back the beginning of the file.
 		file.clear();
 		file.seekg(0, std::ios::beg);
+		gtruth_file.clear();
+		gtruth_file.seekg(0, std::ios::beg);
 
 		// Outputting the triangulation.
 		std::string name =  std::to_string(i); 

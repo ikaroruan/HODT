@@ -1,0 +1,40 @@
+
+Data Set Attribute	Attribute Value
+Entity ID	ASTGDEMV2_0S08W040
+Agency	NASA/METI
+Acquisition Date	2011/10/17
+Vendor	NASA/METI
+Map Projection	GEOGRAPHIC
+Sensor	ASTER
+Resolution	1 ARC-SECOND
+File Size	13552999
+Sensor Type	GDEM
+Ellipsoid	WGS84
+Units	DEGREES
+Version	2.0
+Product Format	GEOTIFF
+Check Sum Value	1016097930
+License ID	17
+License Uplift Update	
+Date Entered	16-NOV-11
+Date Updated	03-NOV-16
+Center Latitude	7°30'00.00"S
+Center Longitude	39°30'00.00"W
+NW Corner Lat	6°59'59.50"S
+NW Corner Long	40°00'00.50"W
+NE Corner Lat	6°59'59.50"S
+NE Corner Long	38°59'59.50"W
+SE Corner Lat	8°00'00.50"S
+SE Corner Long	38°59'59.50"W
+SW Corner Lat	8°00'00.50"S
+SW Corner Long	40°00'00.50"W
+Center Latitude dec	-7.5
+Center Longitude dec	-39.5
+NW Corner Lat dec	-6.9998611
+NW Corner Long dec	-40.0001389
+NE Corner Lat dec	-6.9998611
+NE Corner Long dec	-38.9998611
+SE Corner Lat dec	-8.0001389
+SE Corner Long dec	-38.9998611
+SW Corner Lat dec	-8.0001389
+SW Corner Long dec	-40.0001389

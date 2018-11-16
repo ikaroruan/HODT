@@ -338,13 +338,13 @@ double HODT::jnd(Face_iterator fc, int i)
 	Vertex_iterator v = fc->vertex(ccw(i));
 	Vertex_iterator u = fc->vertex(cw(i));
 
-	std::cout << "  v: x = " << v->point().get_x() << "   y = " << v->point().get_y() << "\n";
-	std::cout << "  u: x = " << u->point().get_x() << "   y = " << u->point().get_y() << "\n";
+	//std::cout << "  v: x = " << v->point().get_x() << "   y = " << v->point().get_y() << "\n";
+	//std::cout << "  u: x = " << u->point().get_x() << "   y = " << u->point().get_y() << "\n";
 	
 	Vector3d normal(-1*(u->point().get_y() - v->point().get_y()), 
 			u->point().get_x() - v->point().get_x(), 0);
 	normal.normalize();
-	normal.print();
+	//normal.print();
 
 	Vertex_iterator w1 = fc->vertex(i);
 	Vertex_iterator w2 = fc->neighbor(i)->vertex(mirror_index(fc, i));
@@ -358,18 +358,14 @@ double HODT::jnd(Face_iterator fc, int i)
 	Vector3d w2v(w2->point().get_x() - v->point().get_x(),
 		     w2->point().get_y() - v->point().get_y(),
 		     w2->info() - v->info());
-	uv.print();
-	w1v.print();
-	w2v.print();
+	//uv.print();
+	//w1v.print();
+	//w2v.print();
 
 	double N1x = uv.get_y() * w1v.get_z() - uv.get_z() * w1v.get_y();
 	double N1y = uv.get_z() * w1v.get_x() - uv.get_x() * w1v.get_z();
 	double N2x = uv.get_y() * w2v.get_z() - uv.get_z() * w2v.get_y();
 	double N2y = uv.get_z() * w2v.get_x() - uv.get_x() * w2v.get_z();
-	std::cout << "N1x = " << N1x << "\n";
-	std::cout << "N1y = " << N1y << "\n";
-	std::cout << "N2x = " << N2x << "\n";
-	std::cout << "N2y = " << N2y << "\n";
 
 	return std::abs((N1x - N2x) * normal.get_x() - (N1y - N2y) * normal.get_y());
 }
@@ -729,12 +725,12 @@ bool HODT::locally_optimal(Optimization_criteria& c)
 						flip(it, it->index(fn)); // Undoing the flip.
 
 						if(it_order <= max_order() && fn_order <= max_order() && after_value < initial_value){
-							std::cout << "== This is " << i << " ==\n";
-							std::cout << "it_order = " << it_order << "\n";
-							std::cout << "fn_order = " << fn_order << "\n";
-							std::cout << "max_order = " << max_order() << "\n";
-							std::cout << "initial_value = " << initial_value << "\n";
-							std::cout << "after_value = " << after_value << "\n\n";
+							//std::cout << "== This is " << i << " ==\n";
+							//std::cout << "it_order = " << it_order << "\n";
+							//std::cout << "fn_order = " << fn_order << "\n";
+							//std::cout << "max_order = " << max_order() << "\n";
+							//std::cout << "initial_value = " << initial_value << "\n";
+							//std::cout << "after_value = " << after_value << "\n\n";
 							return false; // Optimization is possible, so the triangulation is not locally optimal.
 						}
 					}
@@ -743,7 +739,7 @@ bool HODT::locally_optimal(Optimization_criteria& c)
 		}
 	} // End of outer for.
 	
-	std::cout << "GOT IT TRUE.\n";
+	//std::cout << "GOT IT TRUE.\n";
 	return true;
 }
 
@@ -846,22 +842,22 @@ double HODT::optimize(Optimization_criteria& c)
 					std::cout << "\r" << flips_count << std::flush;
 
 					if(flips_count >= 10000 && flips_count <= 10005){
-						std::cout << "\n\n";
-						print_face(fc);
-						std::cout << "\n";
-						print_face(fn);
-						std::cout << "\n";
-						print_face(fc->neighbor(ccw(fc->index(fn))));
-						std::cout << "\n";
-						print_face(fc->neighbor(cw(fc->index(fn))));
-						std::cout << "\n";
-						print_face(fn->neighbor(ccw(fn->index(fc))));
-						std::cout << "\n";
-						print_face(fn->neighbor(cw(fn->index(fc))));
-						std::cout << "Initial value = " << initial_value << "\n";
-						std::cout << "After value = " << after_value << "\n";
-						std::cout << "\n------------------------\n";
-						std::cout << "\n\n";
+						//std::cout << "\n\n";
+						//print_face(fc);
+						//std::cout << "\n";
+						//print_face(fn);
+						//std::cout << "\n";
+						//print_face(fc->neighbor(ccw(fc->index(fn))));
+						//std::cout << "\n";
+						//print_face(fc->neighbor(cw(fc->index(fn))));
+						//std::cout << "\n";
+						//print_face(fn->neighbor(ccw(fn->index(fc))));
+						//std::cout << "\n";
+						//print_face(fn->neighbor(cw(fn->index(fc))));
+						//std::cout << "Initial value = " << initial_value << "\n";
+						//std::cout << "After value = " << after_value << "\n";
+						//std::cout << "\n------------------------\n";
+						//std::cout << "\n\n";
 					}
 				}
 			}
