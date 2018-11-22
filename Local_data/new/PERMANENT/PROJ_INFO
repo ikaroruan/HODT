@@ -1,0 +1,7 @@
+name: UTM Zone 24, Southern Hemisphere
+ellps: grs80
+proj: utm
+zone: 24
+south: defined
+towgs84: 0,0,0,0,0,0,0
+no_defs: defined

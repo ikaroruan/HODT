@@ -27,8 +27,8 @@ void output_header(std::ostream& out){
 	    << std::setw(12) << "ABN2"
 	    << std::setw(13) << "AVG.ASPR1"
 	    << std::setw(13) << "AVG.ASPR2"
-	    << std::setw(8)  << "ORDER1"
-	    << std::setw(8)  << "RMSE"
+	    << std::setw(8)  << "Order"
+	    << std::setw(8)  << "RMSE1"
 	    << std::setw(12) << "E.TIME1"
 	    << std::setw(12) << "E.TIME2"
 	    << std::endl;
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 		std::cout << " -- RUN " << i << " --\n";
 
 		HODT t1(i);
-		HODT t2(i);
+		//HODT t2(i);
 		
 		// Reading input files.
 		int aux1, aux2, aux3, size;
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 		}
 		std::cout << "Insertion done.\n";
 
-		Optimization_criteria c = JND;
+		Optimization_criteria c = ABN;
 		std::chrono::high_resolution_clock::time_point start;
 		std::chrono::high_resolution_clock::time_point end;
 		std::chrono::duration<double> elapsed1;
@@ -110,6 +110,7 @@ int main(int argc, char** argv)
 			vec.push_back(std::make_pair(p, info));
 		}
 		double rmse1 = t1.rmse(vec);
+		//double rmse2 = t2.rmse(vec);
 		std::cout << "RMSE = " << rmse1 << "\n";
 		
 		output_results(out_file, i, abn1, abn1, avg_aratio1, avg_aratio1, order1, rmse1,

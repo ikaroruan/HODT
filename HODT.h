@@ -8,6 +8,12 @@
 #include "Delaunay_triangulation.h"
 #include "Point_with_info.h"
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Projection_traits_xy_3.h>
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Plane_3<K>   Plane3;
+typedef K::Point_3 Point3;
 typedef enum{
 	ABN, WABN, JND
 } Optimization_criteria;
@@ -48,7 +54,7 @@ class HODT : public Delaunay_triangulation
 	double global_min_criteria(Optimization_criteria& c);
 	double global_max_criteria(Optimization_criteria& c);
 	double global_average_criteria(Optimization_criteria& c);
-	double elevation_from_face(Face_iterator fc, Point& p);
+	double elevation_from_face(Face_iterator fc, Point& p, double actual_elev);
 	double rmse_point(Point& p, double actual_elev);
 	double rmse(std::vector<std::pair<Point, double>>& vec);
 	bool convex_polygon(Face_iterator fc, int i);

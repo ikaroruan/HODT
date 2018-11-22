@@ -631,9 +631,9 @@ bool HODT::out_of_bound(Vertex_iterator v)
 	return false;
 }
 
-double HODT::elevation_from_face(Face_iterator fc, Point& p)
+double HODT::elevation_from_face(Face_iterator fc, Point& p, double actual_elev)
 {
-	Vector3d u(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info());
+	/*Vector3d u(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info());
 	Vector3d v(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info());
 	Vector3d w(fc->vertex(2)->point().get_x(), fc->vertex(2)->point().get_y(), fc->vertex(2)->info());
 	
@@ -644,6 +644,15 @@ double HODT::elevation_from_face(Face_iterator fc, Point& p)
 
 	return ((-1 * normal.get_x() * p.get_x()) + (normal.get_x() * u.get_x()) - (normal.get_y() * p.get_y()) + 
 		(normal.get_y() * u.get_y()) + (normal.get_z() * u.get_z()))/normal.get_z();
+*/
+
+	Point3 u(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info());
+	Point3 v(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info());
+	Point3 w(fc->vertex(2)->point().get_x(), fc->vertex(2)->point().get_y(), fc->vertex(2)->info());
+	Plane3 tri(u, v, w);
+	Point3 pp(p.get_x(), p.get_y(), actual_elev);
+
+	return CGAL::squared_distance(tri, pp);
 }
 
 double HODT::rmse_point(Point& p, double actual_elev)
@@ -651,12 +660,15 @@ double HODT::rmse_point(Point& p, double actual_elev)
 	Vertex_location lc;
 	int li = -1;
 	Face_iterator fc = locate(p, lc, li);
+	if(lc == ON_VERTEX)
+		return 0;
 	if(is_infinite(fc))
 		fc = fc->neighbor(fc->index(infinite_vertex()));
 
-	double el = elevation_from_face(fc, p);
+	double el = elevation_from_face(fc, p, actual_elev);
 
-	return std::pow(el - actual_elev, 2);
+	//return std::pow(el - actual_elev, 2);
+	return el;
 }
 
 double HODT::rmse(std::vector<std::pair<Point, double>>& vec)

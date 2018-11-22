@@ -1,0 +1,3 @@
+COMMAND: r.to.vect -s input="testt@neww" output="testt_vector" type="point" column="value"
+GISDBASE: /home/ikaroruan/Documents/Repositories/HODT/Local_data
+LOCATION: new MAPSET: neww USER: ikaroruan DATE: Sat Nov 17 21:51:46 2018
