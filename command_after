@@ -1,0 +1,30 @@
+#!/bin/bash
+echo "============== STARTING FILE 1 OF 10 =============="
+./triangulate toys/test10000.cin toys/test900.cin after1.txt 
+
+echo "============== STARTING FILE 1 OF 2 =============="
+./triangulate toys/test10000.cin toys/test900.cin after2.txt 
+
+echo "============== STARTING FILE 1 OF 3 =============="
+./triangulate toys/test10000.cin toys/test900.cin after3.txt 
+
+echo "============== STARTING FILE 1 OF 4 =============="
+./triangulate toys/test10000.cin toys/test900.cin after4.txt 
+
+echo "============== STARTING FILE 1 OF 5 =============="
+./triangulate toys/test10000.cin toys/test900.cin after5.txt 
+
+echo "============== STARTING FILE 1 OF 6 =============="
+./triangulate toys/test10000.cin toys/test900.cin after6.txt 
+
+echo "============== STARTING FILE 1 OF 7 =============="
+./triangulate toys/test10000.cin toys/test900.cin after7.txt 
+
+echo "============== STARTING FILE 1 OF 8 =============="
+./triangulate toys/test10000.cin toys/test900.cin after8.txt 
+
+echo "============== STARTING FILE 1 OF 9 =============="
+./triangulate toys/test10000.cin toys/test900.cin after9.txt 
+
+echo "============== STARTING FILE 1 OF 10 =============="
+./triangulate toys/test10000.cin toys/test900.cin after10.txt 

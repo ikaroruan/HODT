@@ -1,0 +1,2 @@
+ K-ORDER        ABN1        ABN2    AVG.ASPR1    AVG.ASPR2   Order   RMSE1     E.TIME1     E.TIME2
+       0     175.449     175.449      8.77484      8.77484       0 32.5169     60.2533     60.2533

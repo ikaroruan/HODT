@@ -62,14 +62,22 @@ int main(int argc, char** argv)
 		// Reading input files.
 		int aux1, aux2, aux3, size;
 		double x, y, info;
+		std::vector<Point> ins_vector;
 		file >> size >> aux1 >> aux2 >> aux3;
 		for(int i = 0; i < size; ++i){
 			file >> x >> y >> info;
 			Point p(x, y);
-			Vertex_iterator v1 = t1.insert(p);
-			v1->info(info);
-			//Vertex_iterator v2 = t2.insert(p);
-			//v2->info(info);
+			p.info(info);
+			ins_vector.push_back(p);
+			//Vertex_iterator v1 = t1.insert(p);
+			//v1->info(info);
+		}
+		
+		Spatial_sort_traits sst;
+		CGAL::spatial_sort(ins_vector.begin(), ins_vector.end(), sst);
+		for(std::vector<Point>::iterator it = ins_vector.begin(); it != ins_vector.end(); ++it){
+			Vertex_iterator v = t1.insert(*it);
+			v->info((*it).info());
 		}
 		std::cout << "Insertion done.\n";
 
@@ -128,5 +136,6 @@ int main(int argc, char** argv)
 		t1.show_triangulation(name);
 	}
 	
+	std::system("vlc /home/ikaroruan/Documents/temp/5c0dc7899adc94.48583798.mp3");
 	return 0;
 }

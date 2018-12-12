@@ -631,7 +631,30 @@ bool HODT::out_of_bound(Vertex_iterator v)
 	return false;
 }
 
+double HODT::area_from_face(Point p0, Point p1, Point p2)
+{
+	double area = 0.5 * (p0.get_y() * p2.get_x() + p1.get_x() * p2.get_y() + p0.get_x() * p1.get_y()
+	        	    -p0.get_x() * p2.get_y() - p0.get_y() * p1.get_x() - p2.get_x() * p1.get_y());
+
+	// Points need to be given in counterclockwise order to result in positive value. Otherwise, the result will be negative.
+	// However, the absolute value is correct.
+	if(area < 0)
+		area = area * -1;
+
+	return area;
+}
+
 double HODT::elevation_from_face(Face_iterator fc, Point& p)
+{
+	double area0 = area_from_face(fc->vertex(1)->point(), fc->vertex(2)->point(), p);
+	double area1 = area_from_face(fc->vertex(2)->point(), fc->vertex(0)->point(), p);
+	double area2 = area_from_face(fc->vertex(0)->point(), fc->vertex(1)->point(), p);
+	double total = area0 + area1 + area2;
+
+	return (area0/total) * fc->vertex(0)->info() + (area1/total) * fc->vertex(1)->info() + (area2/total) * fc->vertex(2)->info();
+}
+
+double HODT::elevation_from_face_deprecated(Face_iterator fc, Point& p)
 {
 	Vector3d u(fc->vertex(0)->point().get_x(), fc->vertex(0)->point().get_y(), fc->vertex(0)->info());
 	Vector3d v(fc->vertex(1)->point().get_x(), fc->vertex(1)->point().get_y(), fc->vertex(1)->info());

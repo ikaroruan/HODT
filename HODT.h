@@ -48,7 +48,9 @@ class HODT : public Delaunay_triangulation
 	double global_min_criteria(Optimization_criteria& c);
 	double global_max_criteria(Optimization_criteria& c);
 	double global_average_criteria(Optimization_criteria& c);
+	double area_from_face(Point p0, Point p1, Point p2);
 	double elevation_from_face(Face_iterator fc, Point& p);
+	double elevation_from_face_deprecated(Face_iterator fc, Point& p);
 	double rmse_point(Point& p, double actual_elev);
 	double rmse(std::vector<std::pair<Point, double>>& vec);
 	bool convex_polygon(Face_iterator fc, int i);
